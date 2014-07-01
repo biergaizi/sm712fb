@@ -33,6 +33,7 @@
 #endif
 
 #include "sm712.h"
+#include "modedb.h"
 
 /*
 * Private structure
