@@ -23,8 +23,6 @@
 
 /*Assume SM712 graphics chip has 4MB VRAM */
 #define SM712_VIDEOMEMORYSIZE	  0x00400000
-/*Assume SM722 graphics chip has 8MB VRAM */
-#define SM722_VIDEOMEMORYSIZE	  0x00800000
 
 #define dac_reg	(0x3c8)
 #define dac_val	(0x3c9)

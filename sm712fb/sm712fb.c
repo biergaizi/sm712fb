@@ -15,7 +15,7 @@
  * License. See the file COPYING in the main directory of this archive for
  * more details.
  *
- * Framebuffer driver for Silicon Motion SM710, SM712, SM721 and SM722 chips
+ * Framebuffer driver for Silicon Motion SM712 chip
  */
 
 #include <linux/io.h>
@@ -578,9 +578,7 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 static void smtc_set_timing(struct smtcfb_info *sfb)
 {
 	switch (sfb->chip_id) {
-	case 0x710:
 	case 0x712:
-	case 0x720:
 		sm7xx_set_timing(sfb);
 		break;
 	}
@@ -818,7 +816,6 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 	pci_read_config_byte(pdev, PCI_REVISION_ID, &sfb->chip_rev_id);
 
 	switch (sfb->chip_id) {
-	case 0x710:
 	case 0x712:
 		sfb->fb.fix.mmio_start = mmio_base + 0x00400000;
 		sfb->fb.fix.mmio_len = 0x00400000;
@@ -857,20 +854,6 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 		if (sfb->fb.var.bits_per_pixel == 32)
 			smtc_seqw(0x17, 0x30);
 #endif
-		break;
-	case 0x720:
-		sfb->fb.fix.mmio_start = mmio_base;
-		sfb->fb.fix.mmio_len = 0x00200000;
-		smem_size = SM722_VIDEOMEMORYSIZE;
-		sfb->dpr = ioremap(mmio_base, 0x00a00000);
-		sfb->lfb = sfb->dpr + 0x00200000;
-		sfb->mmio = (smtc_RegBaseAddress =
-		    sfb->dpr + 0x000c0000);
-		sfb->vpr = sfb->dpr + 0x800;
-
-		smtc_seqw(0x62, 0xff);
-		smtc_seqw(0x6a, 0x0d);
-		smtc_seqw(0x6b, 0x02);
 		break;
 	default:
 		dev_err(&pdev->dev,
@@ -917,14 +900,10 @@ failed_free:
 }
 
 /*
- * 0x710 (LynxEM)
  * 0x712 (LynxEM+)
- * 0x720 (Lynx3DM, Lynx3DM+)
  */
 static const struct pci_device_id smtcfb_pci_table[] = {
-	{ PCI_DEVICE(0x126f, 0x710), },
 	{ PCI_DEVICE(0x126f, 0x712), },
-	{ PCI_DEVICE(0x126f, 0x720), },
 	{0,}
 };
 
@@ -973,7 +952,6 @@ static int smtcfb_pci_resume(struct device *device)
 	/* reinit hardware */
 	sm7xx_init_hw();
 	switch (sfb->chip_id) {
-	case 0x710:
 	case 0x712:
 		/* set MCLK = 14.31818 *  (0x16 / 0x2) */
 		smtc_seqw(0x6a, 0x16);
@@ -985,11 +963,6 @@ static int smtcfb_pci_resume(struct device *device)
 		if (sfb->fb.var.bits_per_pixel == 32)
 			smtc_seqw(0x17, 0x30);
 #endif
-		break;
-	case 0x720:
-		smtc_seqw(0x62, 0xff);
-		smtc_seqw(0x6a, 0x0d);
-		smtc_seqw(0x6b, 0x02);
 		break;
 	}
 
