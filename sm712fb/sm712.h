@@ -28,13 +28,13 @@
 #define dac_val	(0x3c9)
 
 extern void __iomem *smtc_RegBaseAddress;
-#define smtc_mmiowb(dat, reg)	writeb(dat, smtc_RegBaseAddress + reg)
-#define smtc_mmioww(dat, reg)	writew(dat, smtc_RegBaseAddress + reg)
-#define smtc_mmiowl(dat, reg)	writel(dat, smtc_RegBaseAddress + reg)
+#define sm712_writeb_mmio(dat, reg)	writeb(dat, smtc_RegBaseAddress + reg)
+#define sm712_writew_mmio(dat, reg)	writew(dat, smtc_RegBaseAddress + reg)
+#define sm712_writel_mmio(dat, reg)	writel(dat, smtc_RegBaseAddress + reg)
 
-#define smtc_mmiorb(reg)	readb(smtc_RegBaseAddress + reg)
-#define smtc_mmiorw(reg)	readw(smtc_RegBaseAddress + reg)
-#define smtc_mmiorl(reg)	readl(smtc_RegBaseAddress + reg)
+#define sm712_readb_mmio(reg)	readb(smtc_RegBaseAddress + reg)
+#define sm712_readw_mmio(reg)	readw(smtc_RegBaseAddress + reg)
+#define sm712_readl_mmio(reg)	readl(smtc_RegBaseAddress + reg)
 
 #define SIZE_SR00_SR04      (0x04 - 0x00 + 1)
 #define SIZE_SR10_SR24      (0x24 - 0x10 + 1)
@@ -51,44 +51,44 @@ extern void __iomem *smtc_RegBaseAddress;
 
 static inline void smtc_crtcw(int reg, int val)
 {
-	smtc_mmiowb(reg, 0x3d4);
-	smtc_mmiowb(val, 0x3d5);
+	sm712_writeb_mmio(reg, 0x3d4);
+	sm712_writeb_mmio(val, 0x3d5);
 }
 
 static inline unsigned int smtc_crtcr(int reg)
 {
-	smtc_mmiowb(reg, 0x3d4);
-	return smtc_mmiorb(0x3d5);
+	sm712_writeb_mmio(reg, 0x3d4);
+	return sm712_readb_mmio(0x3d5);
 }
 
 static inline void smtc_grphw(int reg, int val)
 {
-	smtc_mmiowb(reg, 0x3ce);
-	smtc_mmiowb(val, 0x3cf);
+	sm712_writeb_mmio(reg, 0x3ce);
+	sm712_writeb_mmio(val, 0x3cf);
 }
 
 static inline unsigned int smtc_grphr(int reg)
 {
-	smtc_mmiowb(reg, 0x3ce);
-	return smtc_mmiorb(0x3cf);
+	sm712_writeb_mmio(reg, 0x3ce);
+	return sm712_readb_mmio(0x3cf);
 }
 
 static inline void smtc_attrw(int reg, int val)
 {
-	smtc_mmiorb(0x3da);
-	smtc_mmiowb(reg, 0x3c0);
-	smtc_mmiorb(0x3c1);
-	smtc_mmiowb(val, 0x3c0);
+	sm712_readb_mmio(0x3da);
+	sm712_writeb_mmio(reg, 0x3c0);
+	sm712_readb_mmio(0x3c1);
+	sm712_writeb_mmio(val, 0x3c0);
 }
 
 static inline void smtc_seqw(int reg, int val)
 {
-	smtc_mmiowb(reg, 0x3c4);
-	smtc_mmiowb(val, 0x3c5);
+	sm712_writeb_mmio(reg, 0x3c4);
+	sm712_writeb_mmio(val, 0x3c5);
 }
 
 static inline unsigned int smtc_seqr(int reg)
 {
-	smtc_mmiowb(reg, 0x3c4);
-	return smtc_mmiorb(0x3c5);
+	sm712_writeb_mmio(reg, 0x3c4);
+	return sm712_readb_mmio(0x3c5);
 }
