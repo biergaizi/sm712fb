@@ -45,9 +45,9 @@ struct smtcfb_info {
 	u8  chip_rev_id;
 
 	void __iomem *lfb;	/* linear frame buffer */
-	void __iomem *dp_regs;	/* drawing processor control regs */
-	void __iomem *vp_regs;	/* video processor control regs */
-	void __iomem *cp_regs;	/* capture processor control regs */
+	void __iomem *dpr;	/* drawing processor control regs */
+	void __iomem *vpr;	/* video processor control regs */
+	void __iomem *cpr;	/* capture processor control regs */
 	void __iomem *mmio;	/* memory map IO port */
 
 	u_int width;
@@ -550,28 +550,28 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 	smtc_mmiowb(0x67, 0x3c2);
 
 	/* set VPR registers */
-	writel(0x0, sfb->vp_regs + 0x0C);
-	writel(0x0, sfb->vp_regs + 0x40);
+	writel(0x0, sfb->vpr + 0x0C);
+	writel(0x0, sfb->vpr + 0x40);
 
 	/* set data width */
 	m_nScreenStride =
 		(sfb->width * sfb->fb.var.bits_per_pixel) / 64;
 	switch (sfb->fb.var.bits_per_pixel) {
 	case 8:
-		writel(0x0, sfb->vp_regs + 0x0);
+		writel(0x0, sfb->vpr + 0x0);
 		break;
 	case 16:
-		writel(0x00020000, sfb->vp_regs + 0x0);
+		writel(0x00020000, sfb->vpr + 0x0);
 		break;
 	case 24:
-		writel(0x00040000, sfb->vp_regs + 0x0);
+		writel(0x00040000, sfb->vpr + 0x0);
 		break;
 	case 32:
-		writel(0x00030000, sfb->vp_regs + 0x0);
+		writel(0x00030000, sfb->vpr + 0x0);
 		break;
 	}
 	writel((u32) (((m_nScreenStride + 2) << 16) | m_nScreenStride),
-	       sfb->vp_regs + 0x10);
+	       sfb->vpr + 0x10);
 
 }
 
@@ -830,8 +830,8 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 #endif
 		sfb->mmio = (smtc_RegBaseAddress =
 		    sfb->lfb + 0x00700000);
-		sfb->dp_regs = sfb->lfb + 0x00408000;
-		sfb->vp_regs = sfb->lfb + 0x0040c000;
+		sfb->dpr = sfb->lfb + 0x00408000;
+		sfb->vpr = sfb->lfb + 0x0040c000;
 #ifdef __BIG_ENDIAN
 		if (sfb->fb.var.bits_per_pixel == 32) {
 			sfb->lfb += 0x800000;
@@ -862,11 +862,11 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 		sfb->fb.fix.mmio_start = mmio_base;
 		sfb->fb.fix.mmio_len = 0x00200000;
 		smem_size = SM722_VIDEOMEMORYSIZE;
-		sfb->dp_regs = ioremap(mmio_base, 0x00a00000);
-		sfb->lfb = sfb->dp_regs + 0x00200000;
+		sfb->dpr = ioremap(mmio_base, 0x00a00000);
+		sfb->lfb = sfb->dpr + 0x00200000;
 		sfb->mmio = (smtc_RegBaseAddress =
-		    sfb->dp_regs + 0x000c0000);
-		sfb->vp_regs = sfb->dp_regs + 0x800;
+		    sfb->dpr + 0x000c0000);
+		sfb->vpr = sfb->dpr + 0x800;
 
 		smtc_seqw(0x62, 0xff);
 		smtc_seqw(0x6a, 0x0d);
