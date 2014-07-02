@@ -677,7 +677,7 @@ static struct fb_ops sm712fb_ops = {
 /*
  * alloc struct sm712fb_info and assign default values
  */
-static struct sm712fb_info *sm712_alloc_fb_info(struct pci_dev *pdev)
+static struct sm712fb_info *sm712_fb_info_new(struct pci_dev *pdev)
 {
 	struct sm712fb_info *sfb;
 
@@ -784,7 +784,7 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 
 	sprintf(sm712fb_fix.id, "sm712fb");
 
-	sfb = sm712_alloc_fb_info(pdev);
+	sfb = sm712_fb_info_new(pdev);
 
 	if (!sfb) {
 		err = -ENOMEM;
