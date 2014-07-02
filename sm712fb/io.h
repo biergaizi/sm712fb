@@ -9,44 +9,44 @@
 
 static inline void sm712_write_crtc(struct sm712fb_info *fb, int reg, int val)
 {
-	sm712_writeb(fb->mmio, reg, 0x3d4);
-	sm712_writeb(fb->mmio, val, 0x3d5);
+	sm712_writeb(fb->mmio, 0x3d4, reg);
+	sm712_writeb(fb->mmio, 0x3d5, val);
 }
 
 static inline unsigned int sm712_read_crtc(struct sm712fb_info *fb, int reg)
 {
-	sm712_writeb(fb->mmio, reg, 0x3d4);
+	sm712_writeb(fb->mmio, 0x3d4, reg);
 	return sm712_readb(fb->mmio, 0x3d5);
 }
 
 static inline void sm712_write_grph(struct sm712fb_info *fb, int reg, int val)
 {
-	sm712_writeb(fb->mmio, reg, 0x3ce);
-	sm712_writeb(fb->mmio, val, 0x3cf);
+	sm712_writeb(fb->mmio, 0x3ce, reg);
+	sm712_writeb(fb->mmio, 0x3cf, val);
 }
 
 static inline unsigned int sm712_read_grph(struct sm712fb_info *fb, int reg)
 {
-	sm712_writeb(fb->mmio, reg, 0x3ce);
+	sm712_writeb(fb->mmio, 0x3ce, reg);
 	return sm712_readb(fb->mmio, 0x3cf);
 }
 
 static inline void sm712_write_attr(struct sm712fb_info *fb, int reg, int val)
 {
 	sm712_readb(fb->mmio, 0x3da);
-	sm712_writeb(fb->mmio, reg, 0x3c0);
+	sm712_writeb(fb->mmio, 0x3c0, reg);
 	sm712_readb(fb->mmio, 0x3c1);
-	sm712_writeb(fb->mmio, val, 0x3c0);
+	sm712_writeb(fb->mmio, 0x3c0, val);
 }
 
 static inline void sm712_write_seq(struct sm712fb_info *fb, int reg, int val)
 {
-	sm712_writeb(fb->mmio, reg, 0x3c4);
-	sm712_writeb(fb->mmio, val, 0x3c5);
+	sm712_writeb(fb->mmio, 0x3c4, reg);
+	sm712_writeb(fb->mmio, 0x3c5, val);
 }
 
 static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, int reg)
 {
-	sm712_writeb(fb->mmio, reg, 0x3c4);
+	sm712_writeb(fb->mmio, 0x3c4, reg);
 	return sm712_readb(fb->mmio, 0x3c5);
 }
