@@ -27,6 +27,7 @@
 #include <linux/module.h>
 #include <linux/console.h>
 #include <linux/screen_info.h>
+#include <linux/delay.h>
 
 #ifdef CONFIG_PM
 #include <linux/pm.h>
@@ -47,7 +48,7 @@ struct sm712fb_info {
 	void __iomem *vpr;	/* video processor control regs */
 	void __iomem *cpr;	/* capture processor control regs */
 	void __iomem *mmio;	/* memory map IO port */
-	void __iomem *dataport; /* 2d engine data port */
+	void __iomem *dataport; /* 2d drawing engine data port */
 
 	u_int width;
 	u_int height;
@@ -56,6 +57,7 @@ struct sm712fb_info {
 	u32 colreg[17];
 
 	bool accel;
+	spinlock_t accel_lock;  /* locked when drawing engine is working */
 };
 
 #include "sm712.h"
@@ -772,6 +774,158 @@ static void sm712_unmap_smem(struct sm712fb_info *sfb)
 	}
 }
 
+static int sm712fb_wait(struct sm712fb_info *fb)
+{
+	int i;
+	u32 reg;
+
+	for (i = 10000; i > 0; i--) {
+		reg = sm712_read_seq(fb, 0x16);
+		if ((reg & 0x18) == 0x10)
+			return 0;
+		udelay(1);
+	}
+	return -EBUSY;
+}
+
+static void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
+{
+	u32 width = rect->width, height = rect->height;
+	u32 dx = rect->dx, dy = rect->dy;
+	u32 color;
+
+	struct sm712fb_info *sfb = info->par;
+
+	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
+		return;
+	}
+
+	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
+	    info->fix.visual == FB_VISUAL_DIRECTCOLOR) {
+		color = ((u32 *) (info->pseudo_palette))[rect->color];
+	}
+	else {
+		color = rect->color;
+	}
+
+	spin_lock(&sfb->accel_lock);
+
+	sm712_write_dpr(sfb, DPR_FG_COLOR, color);
+	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
+	sm712_write_dpr(sfb, DPR_SPAN_COORDS, DPR_COORDS(width, height));
+	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE |
+	  	    	     (DE_CTRL_COMMAND_SOLIDFILL << DE_CTRL_COMMAND_SHIFT) |
+			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
+	sm712fb_wait(sfb);
+
+	spin_unlock(&sfb->accel_lock);
+}
+
+static void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
+{
+	u32 sx = area->sx, sy = area->sy;
+	u32 dx = area->dx, dy = area->dy;
+	u32 height = area->height, width = area->width;
+	u32 direction;
+
+	struct sm712fb_info *sfb = info->par;
+
+	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
+		return;
+	}
+
+	if (sy < dy || (sy == dy && sx <= dx)) {
+		sx += width - 1;
+		dx += width - 1;
+		sy += height - 1;
+		dy += height - 1;
+		direction = DE_CTRL_RTOL;
+	}
+	else {
+		direction = 0;
+	}
+
+	spin_lock(&sfb->accel_lock);
+	sm712_write_dpr(sfb, DPR_SRC_COORDS, DPR_COORDS(sx, sy));
+	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
+	sm712_write_dpr(sfb, DPR_SPAN_COORDS, DPR_COORDS(width, height));
+	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE | direction |
+	      		     (DE_CTRL_COMMAND_BITBLT << DE_CTRL_COMMAND_SHIFT) |
+	    		     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
+
+	sm712fb_wait(sfb);
+	spin_unlock(&sfb->accel_lock);
+}
+
+static void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
+{
+	u32 dx = image->dx, dy = image->dy;
+	u32 width = image->width, height = image->height;
+	u32 fg_color, bg_color;
+
+	struct sm712fb_info *sfb = info->par;
+
+	unsigned int imgidx = 0;
+	/* pitch value in bytes of the source framebuffer,
+	 * +ive = top down; -ive = buttom up */
+	int src_delta = image->width >> 3;
+
+	int i, j;
+	unsigned int ubytes_per_scan, u4bytes_per_scan, ubytes_remain;
+	unsigned char ajremain[4];
+
+	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
+		return;
+	}
+	if (unlikely(image->depth != 1)) {
+		// unsupported depth, fallback to draw Tux
+		cfb_imageblit(info, image);
+		return;
+	}
+
+	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
+	    info->fix.visual == FB_VISUAL_DIRECTCOLOR) {
+		fg_color = ((u32 *)(info->pseudo_palette))[image->fg_color];
+		bg_color = ((u32 *)(info->pseudo_palette))[image->bg_color];
+	}
+	else {
+		fg_color = image->fg_color;
+		bg_color = image->bg_color;
+	}
+
+	ubytes_per_scan = (width + 0 + 7) / 8; /* start_bit = 0 */
+	u4bytes_per_scan = ubytes_per_scan & ~3;
+	ubytes_remain = ubytes_per_scan & 3;
+
+	spin_lock(&sfb->accel_lock);
+
+	sm712_write_dpr(sfb, DPR_SRC_COORDS, 0);
+	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
+	sm712_write_dpr(sfb, DPR_SPAN_COORDS, DPR_COORDS(width, height));
+	sm712_write_dpr(sfb, DPR_FG_COLOR, fg_color);
+	sm712_write_dpr(sfb, DPR_BG_COLOR, bg_color);
+
+	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE |
+	    		     (DE_CTRL_COMMAND_HOST_WRITE << DE_CTRL_COMMAND_SHIFT) |
+			     (DE_CTRL_HOST_MONO << DE_CTRL_HOST_SHIFT) |
+			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
+
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < (u4bytes_per_scan / 4); j++) {
+			sm712_write_dataport(sfb, *(unsigned int *) (&image->data[imgidx] + (j * 4)));
+		}
+
+		if (ubytes_remain) {
+			memcpy(ajremain, &image->data[imgidx] + u4bytes_per_scan, ubytes_remain);
+			sm712_write_dataport(sfb, *(unsigned int *) ajremain);
+		}
+		imgidx += src_delta;
+	}
+
+	sm712fb_wait(sfb);
+	spin_unlock(&sfb->accel_lock);
+}
+
 static inline void sm712_init_hw(struct sm712fb_info *sfb)
 {
 	/* enable linear memory mode and packed pixel format */
@@ -792,6 +946,36 @@ static inline void sm712_init_hw(struct sm712fb_info *sfb)
 		sm712_write_seq(sfb, 0x17, 0x30);
 	}
 #endif
+
+	if (!sfb->accel) {
+		printk("sm712fb: disabled 2d acceleration.\n");
+		return;
+	}
+
+	if (sm712fb_wait(sfb) == 0) {
+		sm712_write_dpr(sfb, DPR_CROP_TOPLEFT_COORDS, DPR_COORDS(0, 0));
+
+		/* same width for DPR_PITCH and DPR_SRC_WINDOW */
+		sm712_write_dpr(sfb, DPR_PITCH,
+		    DPR_COORDS(sfb->fb.var.xres, sfb->fb.var.xres));
+		sm712_write_dpr(sfb, DPR_SRC_WINDOW,
+		    DPR_COORDS(sfb->fb.var.xres, sfb->fb.var.xres));
+
+		sm712_write_dpr(sfb, DPR_BYTE_BIT_MASK, 0xffffffff);
+		sm712_write_dpr(sfb, DPR_COLOR_COMPARE_MASK, 0);
+		sm712_write_dpr(sfb, DPR_COLOR_COMPARE, 0);
+		sm712_write_dpr(sfb, DPR_SRC_BASE, 0);
+		sm712_write_dpr(sfb, DPR_DST_BASE, 0);
+
+		sm712fb_ops.fb_fillrect = sm712fb_fillrect;
+		sm712fb_ops.fb_copyarea = sm712fb_copyarea;
+		sm712fb_ops.fb_imageblit = sm712fb_imageblit;
+
+		printk("sm712fb: enabled 2d acceleration.\n");
+	}
+	else {
+		printk("sm712fb: failed to enable 2d accleration.\n");
+	}
 }
 
 static int sm712fb_pci_probe(struct pci_dev *pdev,
