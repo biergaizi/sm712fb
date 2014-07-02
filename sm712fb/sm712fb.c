@@ -42,6 +42,7 @@ struct smtcfb_info {
 	u8  chip_rev_id;
 
 	void __iomem *lfb;	/* linear frame buffer, the base address */
+
 	void __iomem *dpr;	/* drawing processor control regs */
 	void __iomem *vpr;	/* video processor control regs */
 	void __iomem *cpr;	/* capture processor control regs */
@@ -149,10 +150,10 @@ static void sm712_setpalette(int regno, unsigned red, unsigned green,
 	/* set bit 5:4 = 01 (write LCD RAM only) */
 	smtc_seqw(sfb, 0x66, (smtc_seqr(sfb, 0x66) & 0xC3) | 0x10);
 
-	sm712_writeb_mmio(sfb->lfb, regno, dac_reg);
-	sm712_writeb_mmio(sfb->lfb, red >> 10, dac_val);
-	sm712_writeb_mmio(sfb->lfb, green >> 10, dac_val);
-	sm712_writeb_mmio(sfb->lfb, blue >> 10, dac_val);
+	sm712_writeb_mmio(sfb->mmio, regno, dac_reg);
+	sm712_writeb_mmio(sfb->mmio, red >> 10, dac_val);
+	sm712_writeb_mmio(sfb->mmio, green >> 10, dac_val);
+	sm712_writeb_mmio(sfb->mmio, blue >> 10, dac_val);
 }
 
 /* chan_to_field
@@ -496,11 +497,11 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 
 		dev_dbg(&sfb->pdev->dev, "VGAMode index=%d\n", j);
 
-		sm712_writeb_mmio(sfb->lfb, 0x0, 0x3c6);
+		sm712_writeb_mmio(sfb->mmio, 0x0, 0x3c6);
 
 		smtc_seqw(sfb, 0, 0x1);
 
-		sm712_writeb_mmio(sfb->lfb, VGAMode[j].Init_MISC, 0x3c2);
+		sm712_writeb_mmio(sfb->mmio, VGAMode[j].Init_MISC, 0x3c2);
 
 		/* init SEQ register SR00 - SR04 */
 		for (i = 0; i < SIZE_SR00_SR04; i++)
@@ -551,7 +552,7 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 			smtc_crtcw(sfb, i + 0x90,
 				   VGAMode[j].Init_CR90_CRA7[i]);
 	}
-	sm712_writeb_mmio(sfb->lfb, 0x67, 0x3c2);
+	sm712_writeb_mmio(sfb->mmio, 0x67, 0x3c2);
 
 	/* set VPR registers */
 	writel(0x0, sfb->vpr + 0x0C);

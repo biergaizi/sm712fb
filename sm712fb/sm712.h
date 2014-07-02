@@ -50,44 +50,44 @@
 
 static inline void smtc_crtcw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_writeb_mmio(fb->lfb, reg, 0x3d4);
-	sm712_writeb_mmio(fb->lfb, val, 0x3d5);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3d4);
+	sm712_writeb_mmio(fb->mmio, val, 0x3d5);
 }
 
 static inline unsigned int smtc_crtcr(struct smtcfb_info *fb, int reg)
 {
-	sm712_writeb_mmio(fb->lfb, reg, 0x3d4);
-	return sm712_readb_mmio(fb->lfb, 0x3d5);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3d4);
+	return sm712_readb_mmio(fb->mmio, 0x3d5);
 }
 
 static inline void smtc_grphw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_writeb_mmio(fb->lfb, reg, 0x3ce);
-	sm712_writeb_mmio(fb->lfb, val, 0x3cf);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3ce);
+	sm712_writeb_mmio(fb->mmio, val, 0x3cf);
 }
 
 static inline unsigned int smtc_grphr(struct smtcfb_info *fb, int reg)
 {
-	sm712_writeb_mmio(fb->lfb, reg, 0x3ce);
-	return sm712_readb_mmio(fb->lfb, 0x3cf);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3ce);
+	return sm712_readb_mmio(fb->mmio, 0x3cf);
 }
 
 static inline void smtc_attrw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_readb_mmio(fb->lfb, 0x3da);
-	sm712_writeb_mmio(fb->lfb, reg, 0x3c0);
-	sm712_readb_mmio(fb->lfb, 0x3c1);
-	sm712_writeb_mmio(fb->lfb, val, 0x3c0);
+	sm712_readb_mmio(fb->mmio, 0x3da);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3c0);
+	sm712_readb_mmio(fb->mmio, 0x3c1);
+	sm712_writeb_mmio(fb->mmio, val, 0x3c0);
 }
 
 static inline void smtc_seqw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_writeb_mmio(fb->lfb, reg, 0x3c4);
-	sm712_writeb_mmio(fb->lfb, val, 0x3c5);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3c4);
+	sm712_writeb_mmio(fb->mmio, val, 0x3c5);
 }
 
 static inline unsigned int smtc_seqr(struct smtcfb_info *fb, int reg)
 {
-	sm712_writeb_mmio(fb->lfb, reg, 0x3c4);
-	return sm712_readb_mmio(fb->lfb, 0x3c5);
+	sm712_writeb_mmio(fb->mmio, reg, 0x3c4);
+	return sm712_readb_mmio(fb->mmio, 0x3c5);
 }
