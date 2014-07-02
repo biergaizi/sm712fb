@@ -101,7 +101,7 @@ struct vesa_mode {
 	u16  lfb_depth;
 };
 
-bool accel;
+static bool accel = 1;
 
 static struct vesa_mode vesa_mode_table[] = {
 	{"0x301", 640,  480,  8},
