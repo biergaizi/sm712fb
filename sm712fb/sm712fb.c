@@ -32,9 +32,6 @@
 #include <linux/pm.h>
 #endif
 
-#include "sm712.h"
-#include "modedb.h"
-
 /*
 * Private structure
 */
@@ -44,7 +41,7 @@ struct smtcfb_info {
 	u16 chip_id;
 	u8  chip_rev_id;
 
-	void __iomem *lfb;	/* linear frame buffer */
+	void __iomem *lfb;	/* linear frame buffer, the base address */
 	void __iomem *dpr;	/* drawing processor control regs */
 	void __iomem *vpr;	/* video processor control regs */
 	void __iomem *cpr;	/* capture processor control regs */
@@ -57,7 +54,9 @@ struct smtcfb_info {
 	u32 colreg[17];
 };
 
-void __iomem *smtc_RegBaseAddress;	/* Memory Map IO starting address */
+#include "sm712.h"
+#include "modedb.h"
+
 
 static struct fb_var_screeninfo smtcfb_var = {
 	.xres           = 1024,
@@ -145,13 +144,15 @@ __setup("vga=", sm7xx_vga_setup);
 static void sm712_setpalette(int regno, unsigned red, unsigned green,
 			     unsigned blue, struct fb_info *info)
 {
-	/* set bit 5:4 = 01 (write LCD RAM only) */
-	smtc_seqw(0x66, (smtc_seqr(0x66) & 0xC3) | 0x10);
+	struct smtcfb_info *sfb = info->par;
 
-	sm712_writeb_mmio(regno, dac_reg);
-	sm712_writeb_mmio(red >> 10, dac_val);
-	sm712_writeb_mmio(green >> 10, dac_val);
-	sm712_writeb_mmio(blue >> 10, dac_val);
+	/* set bit 5:4 = 01 (write LCD RAM only) */
+	smtc_seqw(sfb, 0x66, (smtc_seqr(sfb, 0x66) & 0xC3) | 0x10);
+
+	sm712_writeb_mmio(sfb->lfb, regno, dac_reg);
+	sm712_writeb_mmio(sfb->lfb, red >> 10, dac_val);
+	sm712_writeb_mmio(sfb->lfb, green >> 10, dac_val);
+	sm712_writeb_mmio(sfb->lfb, blue >> 10, dac_val);
 }
 
 /* chan_to_field
@@ -171,67 +172,69 @@ static inline unsigned int chan_to_field(unsigned int chan,
 
 static int smtc_blank(int blank_mode, struct fb_info *info)
 {
+	struct smtcfb_info *sfb = info->par;
+
 	/* clear DPMS setting */
 	switch (blank_mode) {
 	case FB_BLANK_UNBLANK:
 		/* Screen On: HSync: On, VSync : On */
-		smtc_seqw(0x01, (smtc_seqr(0x01) & (~0x20)));
-		smtc_seqw(0x6a, 0x16);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x21, (smtc_seqr(0x21) & 0x77));
-		smtc_seqw(0x22, (smtc_seqr(0x22) & (~0x30)));
-		smtc_seqw(0x23, (smtc_seqr(0x23) & (~0xc0)));
-		smtc_seqw(0x24, (smtc_seqr(0x24) | 0x01));
-		smtc_seqw(0x31, (smtc_seqr(0x31) | 0x03));
+		smtc_seqw(sfb, 0x01, (smtc_seqr(sfb, 0x01) & (~0x20)));
+		smtc_seqw(sfb, 0x6a, 0x16);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x21, (smtc_seqr(sfb, 0x21) & 0x77));
+		smtc_seqw(sfb, 0x22, (smtc_seqr(sfb, 0x22) & (~0x30)));
+		smtc_seqw(sfb, 0x23, (smtc_seqr(sfb, 0x23) & (~0xc0)));
+		smtc_seqw(sfb, 0x24, (smtc_seqr(sfb, 0x24) | 0x01));
+		smtc_seqw(sfb, 0x31, (smtc_seqr(sfb, 0x31) | 0x03));
 		break;
 	case FB_BLANK_NORMAL:
 		/* Screen Off: HSync: On, VSync : On   Soft blank */
-		smtc_seqw(0x01, (smtc_seqr(0x01) & (~0x20)));
-		smtc_seqw(0x6a, 0x16);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x22, (smtc_seqr(0x22) & (~0x30)));
-		smtc_seqw(0x23, (smtc_seqr(0x23) & (~0xc0)));
-		smtc_seqw(0x24, (smtc_seqr(0x24) | 0x01));
-		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
+		smtc_seqw(sfb, 0x01, (smtc_seqr(sfb, 0x01) & (~0x20)));
+		smtc_seqw(sfb, 0x6a, 0x16);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x22, (smtc_seqr(sfb, 0x22) & (~0x30)));
+		smtc_seqw(sfb, 0x23, (smtc_seqr(sfb, 0x23) & (~0xc0)));
+		smtc_seqw(sfb, 0x24, (smtc_seqr(sfb, 0x24) | 0x01));
+		smtc_seqw(sfb, 0x31, ((smtc_seqr(sfb, 0x31) & (~0x07)) | 0x00));
 		break;
 	case FB_BLANK_VSYNC_SUSPEND:
 		/* Screen On: HSync: On, VSync : Off */
-		smtc_seqw(0x01, (smtc_seqr(0x01) | 0x20));
-		smtc_seqw(0x20, (smtc_seqr(0x20) & (~0xB0)));
-		smtc_seqw(0x6a, 0x0c);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x21, (smtc_seqr(0x21) | 0x88));
-		smtc_seqw(0x22, ((smtc_seqr(0x22) & (~0x30)) | 0x20));
-		smtc_seqw(0x23, ((smtc_seqr(0x23) & (~0xc0)) | 0x20));
-		smtc_seqw(0x24, (smtc_seqr(0x24) & (~0x01)));
-		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-		smtc_seqw(0x34, (smtc_seqr(0x34) | 0x80));
+		smtc_seqw(sfb, 0x01, (smtc_seqr(sfb, 0x01) | 0x20));
+		smtc_seqw(sfb, 0x20, (smtc_seqr(sfb, 0x20) & (~0xB0)));
+		smtc_seqw(sfb, 0x6a, 0x0c);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x21, (smtc_seqr(sfb, 0x21) | 0x88));
+		smtc_seqw(sfb, 0x22, ((smtc_seqr(sfb, 0x22) & (~0x30)) | 0x20));
+		smtc_seqw(sfb, 0x23, ((smtc_seqr(sfb, 0x23) & (~0xc0)) | 0x20));
+		smtc_seqw(sfb, 0x24, (smtc_seqr(sfb, 0x24) & (~0x01)));
+		smtc_seqw(sfb, 0x31, ((smtc_seqr(sfb, 0x31) & (~0x07)) | 0x00));
+		smtc_seqw(sfb, 0x34, (smtc_seqr(sfb, 0x34) | 0x80));
 		break;
 	case FB_BLANK_HSYNC_SUSPEND:
 		/* Screen On: HSync: Off, VSync : On */
-		smtc_seqw(0x01, (smtc_seqr(0x01) | 0x20));
-		smtc_seqw(0x20, (smtc_seqr(0x20) & (~0xB0)));
-		smtc_seqw(0x6a, 0x0c);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x21, (smtc_seqr(0x21) | 0x88));
-		smtc_seqw(0x22, ((smtc_seqr(0x22) & (~0x30)) | 0x10));
-		smtc_seqw(0x23, ((smtc_seqr(0x23) & (~0xc0)) | 0xD8));
-		smtc_seqw(0x24, (smtc_seqr(0x24) & (~0x01)));
-		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-		smtc_seqw(0x34, (smtc_seqr(0x34) | 0x80));
+		smtc_seqw(sfb, 0x01, (smtc_seqr(sfb, 0x01) | 0x20));
+		smtc_seqw(sfb, 0x20, (smtc_seqr(sfb, 0x20) & (~0xB0)));
+		smtc_seqw(sfb, 0x6a, 0x0c);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x21, (smtc_seqr(sfb, 0x21) | 0x88));
+		smtc_seqw(sfb, 0x22, ((smtc_seqr(sfb, 0x22) & (~0x30)) | 0x10));
+		smtc_seqw(sfb, 0x23, ((smtc_seqr(sfb, 0x23) & (~0xc0)) | 0xD8));
+		smtc_seqw(sfb, 0x24, (smtc_seqr(sfb, 0x24) & (~0x01)));
+		smtc_seqw(sfb, 0x31, ((smtc_seqr(sfb, 0x31) & (~0x07)) | 0x00));
+		smtc_seqw(sfb, 0x34, (smtc_seqr(sfb, 0x34) | 0x80));
 		break;
 	case FB_BLANK_POWERDOWN:
 		/* Screen On: HSync: Off, VSync : Off */
-		smtc_seqw(0x01, (smtc_seqr(0x01) | 0x20));
-		smtc_seqw(0x20, (smtc_seqr(0x20) & (~0xB0)));
-		smtc_seqw(0x6a, 0x0c);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x21, (smtc_seqr(0x21) | 0x88));
-		smtc_seqw(0x22, ((smtc_seqr(0x22) & (~0x30)) | 0x30));
-		smtc_seqw(0x23, ((smtc_seqr(0x23) & (~0xc0)) | 0xD8));
-		smtc_seqw(0x24, (smtc_seqr(0x24) & (~0x01)));
-		smtc_seqw(0x31, ((smtc_seqr(0x31) & (~0x07)) | 0x00));
-		smtc_seqw(0x34, (smtc_seqr(0x34) | 0x80));
+		smtc_seqw(sfb, 0x01, (smtc_seqr(sfb, 0x01) | 0x20));
+		smtc_seqw(sfb, 0x20, (smtc_seqr(sfb, 0x20) & (~0xB0)));
+		smtc_seqw(sfb, 0x6a, 0x0c);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x21, (smtc_seqr(sfb, 0x21) | 0x88));
+		smtc_seqw(sfb, 0x22, ((smtc_seqr(sfb, 0x22) & (~0x30)) | 0x30));
+		smtc_seqw(sfb, 0x23, ((smtc_seqr(sfb, 0x23) & (~0xc0)) | 0xD8));
+		smtc_seqw(sfb, 0x24, (smtc_seqr(sfb, 0x24) & (~0x01)));
+		smtc_seqw(sfb, 0x31, ((smtc_seqr(sfb, 0x31) & (~0x07)) | 0x00));
+		smtc_seqw(sfb, 0x34, (smtc_seqr(sfb, 0x34) | 0x80));
 		break;
 	default:
 		return -EINVAL;
@@ -491,19 +494,19 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 
 			dev_dbg(&sfb->pdev->dev, "VGAMode index=%d\n", j);
 
-			sm712_writeb_mmio(0x0, 0x3c6);
+			sm712_writeb_mmio(sfb->lfb, 0x0, 0x3c6);
 
-			smtc_seqw(0, 0x1);
+			smtc_seqw(sfb, 0, 0x1);
 
-			sm712_writeb_mmio(VGAMode[j].Init_MISC, 0x3c2);
+			sm712_writeb_mmio(sfb->lfb, VGAMode[j].Init_MISC, 0x3c2);
 
 			/* init SEQ register SR00 - SR04 */
 			for (i = 0; i < SIZE_SR00_SR04; i++)
-				smtc_seqw(i, VGAMode[j].Init_SR00_SR04[i]);
+				smtc_seqw(sfb, i, VGAMode[j].Init_SR00_SR04[i]);
 
 			/* init SEQ register SR10 - SR24 */
 			for (i = 0; i < SIZE_SR10_SR24; i++)
-				smtc_seqw(i + 0x10,
+				smtc_seqw(sfb, i + 0x10,
 					  VGAMode[j].Init_SR10_SR24[i]);
 
 			/* init SEQ register SR30 - SR75 */
@@ -511,43 +514,43 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 				if ((i + 0x30) != 0x62 &&
 				    (i + 0x30) != 0x6a &&
 				    (i + 0x30) != 0x6b)
-					smtc_seqw(i + 0x30,
+					smtc_seqw(sfb, i + 0x30,
 						VGAMode[j].Init_SR30_SR75[i]);
 
 			/* init SEQ register SR80 - SR93 */
 			for (i = 0; i < SIZE_SR80_SR93; i++)
-				smtc_seqw(i + 0x80,
+				smtc_seqw(sfb, i + 0x80,
 					  VGAMode[j].Init_SR80_SR93[i]);
 
 			/* init SEQ register SRA0 - SRAF */
 			for (i = 0; i < SIZE_SRA0_SRAF; i++)
-				smtc_seqw(i + 0xa0,
+				smtc_seqw(sfb, i + 0xa0,
 					  VGAMode[j].Init_SRA0_SRAF[i]);
 
 			/* init Graphic register GR00 - GR08 */
 			for (i = 0; i < SIZE_GR00_GR08; i++)
-				smtc_grphw(i, VGAMode[j].Init_GR00_GR08[i]);
+				smtc_grphw(sfb, i, VGAMode[j].Init_GR00_GR08[i]);
 
 			/* init Attribute register AR00 - AR14 */
 			for (i = 0; i < SIZE_AR00_AR14; i++)
-				smtc_attrw(i, VGAMode[j].Init_AR00_AR14[i]);
+				smtc_attrw(sfb, i, VGAMode[j].Init_AR00_AR14[i]);
 
 			/* init CRTC register CR00 - CR18 */
 			for (i = 0; i < SIZE_CR00_CR18; i++)
-				smtc_crtcw(i, VGAMode[j].Init_CR00_CR18[i]);
+				smtc_crtcw(sfb, i, VGAMode[j].Init_CR00_CR18[i]);
 
 			/* init CRTC register CR30 - CR4D */
 			for (i = 0; i < SIZE_CR30_CR4D; i++)
-				smtc_crtcw(i + 0x30,
+				smtc_crtcw(sfb, i + 0x30,
 					   VGAMode[j].Init_CR30_CR4D[i]);
 
 			/* init CRTC register CR90 - CRA7 */
 			for (i = 0; i < SIZE_CR90_CRA7; i++)
-				smtc_crtcw(i + 0x90,
+				smtc_crtcw(sfb, i + 0x90,
 					   VGAMode[j].Init_CR90_CRA7[i]);
 		}
 	}
-	sm712_writeb_mmio(0x67, 0x3c2);
+	sm712_writeb_mmio(sfb->lfb, 0x67, 0x3c2);
 
 	/* set VPR registers */
 	writel(0x0, sfb->vpr + 0x0C);
@@ -708,16 +711,6 @@ static void smtc_free_fb_info(struct smtcfb_info *sfb)
 }
 
 /*
- * Unmap in the memory mapped IO registers
- */
-
-static void smtc_unmap_mmio(struct smtcfb_info *sfb)
-{
-	if (sfb && smtc_RegBaseAddress)
-		smtc_RegBaseAddress = NULL;
-}
-
-/*
  * Map in the screen memory
  */
 
@@ -754,6 +747,7 @@ static void smtc_unmap_smem(struct smtcfb_info *sfb)
 	if (sfb && sfb->fb.screen_base) {
 		iounmap(sfb->fb.screen_base);
 		sfb->fb.screen_base = NULL;
+		sfb->lfb = NULL;
 	}
 }
 
@@ -825,8 +819,7 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 #else
 		sfb->lfb = ioremap(mmio_base, 0x00800000);
 #endif
-		sfb->mmio = (smtc_RegBaseAddress =
-		    sfb->lfb + 0x00700000);
+		sfb->mmio = sfb->lfb + 0x00700000;
 		sfb->dpr = sfb->lfb + 0x00408000;
 		sfb->vpr = sfb->lfb + 0x0040c000;
 #ifdef __BIG_ENDIAN
@@ -835,7 +828,7 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 			dev_info(&pdev->dev, "sfb->lfb=%p", sfb->lfb);
 		}
 #endif
-		if (!smtc_RegBaseAddress) {
+		if (!sfb->mmio) {
 			dev_err(&pdev->dev,
 				"%s: unable to map memory mapped IO!",
 				sfb->fb.fix.id);
@@ -844,15 +837,15 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 		}
 
 		/* set MCLK = 14.31818 * (0x16 / 0x2) */
-		smtc_seqw(0x6a, 0x16);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x62, 0x3e);
+		smtc_seqw(sfb, 0x6a, 0x16);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x62, 0x3e);
 		/* enable PCI burst */
-		smtc_seqw(0x17, 0x20);
+		smtc_seqw(sfb, 0x17, 0x20);
 		/* enable word swap */
 #ifdef __BIG_ENDIAN
 		if (sfb->fb.var.bits_per_pixel == 32)
-			smtc_seqw(0x17, 0x30);
+			smtc_seqw(sfb, 0x17, 0x30);
 #endif
 		break;
 	default:
@@ -889,10 +882,8 @@ failed:
 	dev_err(&pdev->dev, "Silicon Motion, Inc. primary display init fail.");
 
 	smtc_unmap_smem(sfb);
-	smtc_unmap_mmio(sfb);
 failed_fb:
 	smtc_free_fb_info(sfb);
-
 failed_free:
 	pci_disable_device(pdev);
 
@@ -913,7 +904,6 @@ static void smtcfb_pci_remove(struct pci_dev *pdev)
 
 	sfb = pci_get_drvdata(pdev);
 	smtc_unmap_smem(sfb);
-	smtc_unmap_mmio(sfb);
 	unregister_framebuffer(&sfb->fb);
 	smtc_free_fb_info(sfb);
 }
@@ -929,15 +919,15 @@ static int smtcfb_pci_suspend(struct device *device)
 	/* set the hw in sleep mode use external clock and self memory refresh
 	 * so that we can turn off internal PLLs later on
 	 */
-	smtc_seqw(0x20, (smtc_seqr(0x20) | 0xc0));
-	smtc_seqw(0x69, (smtc_seqr(0x69) & 0xf7));
+	smtc_seqw(sfb, 0x20, (smtc_seqr(sfb, 0x20) | 0xc0));
+	smtc_seqw(sfb, 0x69, (smtc_seqr(sfb, 0x69) & 0xf7));
 
 	console_lock();
 	fb_set_suspend(&sfb->fb, 1);
 	console_unlock();
 
 	/* additionally turn off all function blocks including internal PLLs */
-	smtc_seqw(0x21, 0xff);
+	smtc_seqw(sfb, 0x21, 0xff);
 
 	return 0;
 }
@@ -954,20 +944,20 @@ static int smtcfb_pci_resume(struct device *device)
 	switch (sfb->chip_id) {
 	case 0x712:
 		/* set MCLK = 14.31818 *  (0x16 / 0x2) */
-		smtc_seqw(0x6a, 0x16);
-		smtc_seqw(0x6b, 0x02);
-		smtc_seqw(0x62, 0x3e);
+		smtc_seqw(sfb, 0x6a, 0x16);
+		smtc_seqw(sfb, 0x6b, 0x02);
+		smtc_seqw(sfb, 0x62, 0x3e);
 		/* enable PCI burst */
-		smtc_seqw(0x17, 0x20);
+		smtc_seqw(sfb, 0x17, 0x20);
 #ifdef __BIG_ENDIAN
 		if (sfb->fb.var.bits_per_pixel == 32)
-			smtc_seqw(0x17, 0x30);
+			smtc_seqw(sfb, 0x17, 0x30);
 #endif
 		break;
 	}
 
-	smtc_seqw(0x34, (smtc_seqr(0x34) | 0xc0));
-	smtc_seqw(0x33, ((smtc_seqr(0x33) | 0x08) & 0xfb));
+	smtc_seqw(sfb, 0x34, (smtc_seqr(sfb, 0x34) | 0xc0));
+	smtc_seqw(sfb, 0x33, ((smtc_seqr(sfb, 0x33) | 0x08) & 0xfb));
 
 	smtcfb_setmode(sfb);
 

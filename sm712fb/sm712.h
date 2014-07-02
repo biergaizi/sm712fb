@@ -27,14 +27,13 @@
 #define dac_reg	(0x3c8)
 #define dac_val	(0x3c9)
 
-extern void __iomem *smtc_RegBaseAddress;
-#define sm712_writeb_mmio(dat, reg)	writeb(dat, smtc_RegBaseAddress + reg)
-#define sm712_writew_mmio(dat, reg)	writew(dat, smtc_RegBaseAddress + reg)
-#define sm712_writel_mmio(dat, reg)	writel(dat, smtc_RegBaseAddress + reg)
+#define sm712_writeb_mmio(base, dat, reg)	writeb(dat, base + reg)
+#define sm712_writew_mmio(base, dat, reg)	writew(dat, base + reg)
+#define sm712_writel_mmio(base, dat, reg)	writel(dat, base + reg)
 
-#define sm712_readb_mmio(reg)	readb(smtc_RegBaseAddress + reg)
-#define sm712_readw_mmio(reg)	readw(smtc_RegBaseAddress + reg)
-#define sm712_readl_mmio(reg)	readl(smtc_RegBaseAddress + reg)
+#define sm712_readb_mmio(base, reg)	readb(base + reg)
+#define sm712_readw_mmio(base, reg)	readw(base + reg)
+#define sm712_readl_mmio(base, reg)	readl(base + reg)
 
 #define SIZE_SR00_SR04      (0x04 - 0x00 + 1)
 #define SIZE_SR10_SR24      (0x24 - 0x10 + 1)
@@ -49,46 +48,46 @@ extern void __iomem *smtc_RegBaseAddress;
 #define SIZE_VPR		(0x6C + 1)
 #define SIZE_DPR		(0x44 + 1)
 
-static inline void smtc_crtcw(int reg, int val)
+static inline void smtc_crtcw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_writeb_mmio(reg, 0x3d4);
-	sm712_writeb_mmio(val, 0x3d5);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3d4);
+	sm712_writeb_mmio(fb->lfb, val, 0x3d5);
 }
 
-static inline unsigned int smtc_crtcr(int reg)
+static inline unsigned int smtc_crtcr(struct smtcfb_info *fb, int reg)
 {
-	sm712_writeb_mmio(reg, 0x3d4);
-	return sm712_readb_mmio(0x3d5);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3d4);
+	return sm712_readb_mmio(fb->lfb, 0x3d5);
 }
 
-static inline void smtc_grphw(int reg, int val)
+static inline void smtc_grphw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_writeb_mmio(reg, 0x3ce);
-	sm712_writeb_mmio(val, 0x3cf);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3ce);
+	sm712_writeb_mmio(fb->lfb, val, 0x3cf);
 }
 
-static inline unsigned int smtc_grphr(int reg)
+static inline unsigned int smtc_grphr(struct smtcfb_info *fb, int reg)
 {
-	sm712_writeb_mmio(reg, 0x3ce);
-	return sm712_readb_mmio(0x3cf);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3ce);
+	return sm712_readb_mmio(fb->lfb, 0x3cf);
 }
 
-static inline void smtc_attrw(int reg, int val)
+static inline void smtc_attrw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_readb_mmio(0x3da);
-	sm712_writeb_mmio(reg, 0x3c0);
-	sm712_readb_mmio(0x3c1);
-	sm712_writeb_mmio(val, 0x3c0);
+	sm712_readb_mmio(fb->lfb, 0x3da);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3c0);
+	sm712_readb_mmio(fb->lfb, 0x3c1);
+	sm712_writeb_mmio(fb->lfb, val, 0x3c0);
 }
 
-static inline void smtc_seqw(int reg, int val)
+static inline void smtc_seqw(struct smtcfb_info *fb, int reg, int val)
 {
-	sm712_writeb_mmio(reg, 0x3c4);
-	sm712_writeb_mmio(val, 0x3c5);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3c4);
+	sm712_writeb_mmio(fb->lfb, val, 0x3c5);
 }
 
-static inline unsigned int smtc_seqr(int reg)
+static inline unsigned int smtc_seqr(struct smtcfb_info *fb, int reg)
 {
-	sm712_writeb_mmio(reg, 0x3c4);
-	return sm712_readb_mmio(0x3c5);
+	sm712_writeb_mmio(fb->lfb, reg, 0x3c4);
+	return sm712_readb_mmio(fb->lfb, 0x3c5);
 }
