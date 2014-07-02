@@ -1,5 +1,5 @@
 /*
- * Silicon Motion SM7XX frame buffer device
+ * Silicon Motion SM712 frame buffer device
  *
  * Copyright (C) 2006 Silicon Motion Technology Corp.
  * Authors:  Ge Wang, gewang@siliconmotion.com
