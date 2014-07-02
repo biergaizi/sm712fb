@@ -7,16 +7,16 @@ struct ModeInit {
 	int bpp;
 	int hz;
 	unsigned char Init_MISC;
-	unsigned char Init_SR00_SR04[SIZE_SR00_SR04];
-	unsigned char Init_SR10_SR24[SIZE_SR10_SR24];
-	unsigned char Init_SR30_SR75[SIZE_SR30_SR75];
-	unsigned char Init_SR80_SR93[SIZE_SR80_SR93];
-	unsigned char Init_SRA0_SRAF[SIZE_SRA0_SRAF];
-	unsigned char Init_GR00_GR08[SIZE_GR00_GR08];
-	unsigned char Init_AR00_AR14[SIZE_AR00_AR14];
-	unsigned char Init_CR00_CR18[SIZE_CR00_CR18];
-	unsigned char Init_CR30_CR4D[SIZE_CR30_CR4D];
-	unsigned char Init_CR90_CRA7[SIZE_CR90_CRA7];
+	unsigned char Init_SR00_SR04[SR00_SR04_SIZE];
+	unsigned char Init_SR10_SR24[SR10_SR24_SIZE];
+	unsigned char Init_SR30_SR75[SR30_SR75_SIZE];
+	unsigned char Init_SR80_SR93[SR80_SR93_SIZE];
+	unsigned char Init_SRA0_SRAF[SRA0_SRAF_SIZE];
+	unsigned char Init_GR00_GR08[GR00_GR08_SIZE];
+	unsigned char Init_AR00_AR14[AR00_AR14_SIZE];
+	unsigned char Init_CR00_CR18[CR00_CR18_SIZE];
+	unsigned char Init_CR30_CR4D[CR30_CR4D_SIZE];
+	unsigned char Init_CR90_CRA7[CR90_CRA7_SIZE];
 };
 
 /**********************************************************************

@@ -152,10 +152,10 @@ static void sm712_setpalette(int regno, unsigned red, unsigned green,
 	/* set bit 5:4 = 01 (write LCD RAM only) */
 	sm712_write_seq(sfb, 0x66, (sm712_read_seq(sfb, 0x66) & 0xC3) | 0x10);
 
-	sm712_writeb(sfb->mmio, regno, dac_reg);
-	sm712_writeb(sfb->mmio, red >> 10, dac_val);
-	sm712_writeb(sfb->mmio, green >> 10, dac_val);
-	sm712_writeb(sfb->mmio, blue >> 10, dac_val);
+	sm712_writeb(sfb->mmio, regno, DAC_REG);
+	sm712_writeb(sfb->mmio, red >> 10, DAC_VAL);
+	sm712_writeb(sfb->mmio, green >> 10, DAC_VAL);
+	sm712_writeb(sfb->mmio, blue >> 10, DAC_VAL);
 }
 
 /* chan_to_field
@@ -506,16 +506,16 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 		sm712_writeb(sfb->mmio, VGAMode[j].Init_MISC, 0x3c2);
 
 		/* init SEQ register SR00 - SR04 */
-		for (i = 0; i < SIZE_SR00_SR04; i++)
+		for (i = 0; i < SR00_SR04_SIZE; i++)
 			sm712_write_seq(sfb, i, VGAMode[j].Init_SR00_SR04[i]);
 
 		/* init SEQ register SR10 - SR24 */
-		for (i = 0; i < SIZE_SR10_SR24; i++)
+		for (i = 0; i < SR10_SR24_SIZE; i++)
 			sm712_write_seq(sfb, i + 0x10,
 				  VGAMode[j].Init_SR10_SR24[i]);
 
 		/* init SEQ register SR30 - SR75 */
-		for (i = 0; i < SIZE_SR30_SR75; i++)
+		for (i = 0; i < SR30_SR75_SIZE; i++)
 			if ((i + 0x30) != 0x62 &&
 			    (i + 0x30) != 0x6a &&
 			    (i + 0x30) != 0x6b)
@@ -523,34 +523,34 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 					VGAMode[j].Init_SR30_SR75[i]);
 
 		/* init SEQ register SR80 - SR93 */
-		for (i = 0; i < SIZE_SR80_SR93; i++)
+		for (i = 0; i < SR80_SR93_SIZE; i++)
 			sm712_write_seq(sfb, i + 0x80,
 				  VGAMode[j].Init_SR80_SR93[i]);
 
 		/* init SEQ register SRA0 - SRAF */
-		for (i = 0; i < SIZE_SRA0_SRAF; i++)
+		for (i = 0; i < SRA0_SRAF_SIZE; i++)
 			sm712_write_seq(sfb, i + 0xa0,
 				  VGAMode[j].Init_SRA0_SRAF[i]);
 
 		/* init Graphic register GR00 - GR08 */
-		for (i = 0; i < SIZE_GR00_GR08; i++)
+		for (i = 0; i < GR00_GR08_SIZE; i++)
 			sm712_write_grph(sfb, i, VGAMode[j].Init_GR00_GR08[i]);
 
 		/* init Attribute register AR00 - AR14 */
-		for (i = 0; i < SIZE_AR00_AR14; i++)
+		for (i = 0; i < AR00_AR14_SIZE; i++)
 			sm712_write_attr(sfb, i, VGAMode[j].Init_AR00_AR14[i]);
 
 		/* init CRTC register CR00 - CR18 */
-		for (i = 0; i < SIZE_CR00_CR18; i++)
+		for (i = 0; i < CR00_CR18_SIZE; i++)
 			sm712_write_crtc(sfb, i, VGAMode[j].Init_CR00_CR18[i]);
 
 		/* init CRTC register CR30 - CR4D */
-		for (i = 0; i < SIZE_CR30_CR4D; i++)
+		for (i = 0; i < CR30_CR4D_SIZE; i++)
 			sm712_write_crtc(sfb, i + 0x30,
 				   VGAMode[j].Init_CR30_CR4D[i]);
 
 		/* init CRTC register CR90 - CRA7 */
-		for (i = 0; i < SIZE_CR90_CRA7; i++)
+		for (i = 0; i < CR90_CRA7_SIZE; i++)
 			sm712_write_crtc(sfb, i + 0x90,
 				   VGAMode[j].Init_CR90_CRA7[i]);
 	}
