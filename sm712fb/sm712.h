@@ -27,14 +27,6 @@
 #define dac_reg	(0x3c8)
 #define dac_val	(0x3c9)
 
-#define sm712_writeb(base, dat, reg)	writeb(dat, base + reg)
-#define sm712_writew(base, dat, reg)	writew(dat, base + reg)
-#define sm712_writel(base, dat, reg)	writel(dat, base + reg)
-
-#define sm712_readb(base, reg)	readb(base + reg)
-#define sm712_readw(base, reg)	readw(base + reg)
-#define sm712_readl(base, reg)	readl(base + reg)
-
 #define SIZE_SR00_SR04      (0x04 - 0x00 + 1)
 #define SIZE_SR10_SR24      (0x24 - 0x10 + 1)
 #define SIZE_SR30_SR75      (0x75 - 0x30 + 1)
@@ -47,47 +39,3 @@
 #define SIZE_CR90_CRA7      (0xA7 - 0x90 + 1)
 #define SIZE_VPR		(0x6C + 1)
 #define SIZE_DPR		(0x44 + 1)
-
-static inline void sm712_write_crtc(struct sm712fb_info *fb, int reg, int val)
-{
-	sm712_writeb(fb->mmio, reg, 0x3d4);
-	sm712_writeb(fb->mmio, val, 0x3d5);
-}
-
-static inline unsigned int sm712_read_crtc(struct sm712fb_info *fb, int reg)
-{
-	sm712_writeb(fb->mmio, reg, 0x3d4);
-	return sm712_readb(fb->mmio, 0x3d5);
-}
-
-static inline void sm712_write_grph(struct sm712fb_info *fb, int reg, int val)
-{
-	sm712_writeb(fb->mmio, reg, 0x3ce);
-	sm712_writeb(fb->mmio, val, 0x3cf);
-}
-
-static inline unsigned int sm712_read_grph(struct sm712fb_info *fb, int reg)
-{
-	sm712_writeb(fb->mmio, reg, 0x3ce);
-	return sm712_readb(fb->mmio, 0x3cf);
-}
-
-static inline void sm712_write_attr(struct sm712fb_info *fb, int reg, int val)
-{
-	sm712_readb(fb->mmio, 0x3da);
-	sm712_writeb(fb->mmio, reg, 0x3c0);
-	sm712_readb(fb->mmio, 0x3c1);
-	sm712_writeb(fb->mmio, val, 0x3c0);
-}
-
-static inline void sm712_write_seq(struct sm712fb_info *fb, int reg, int val)
-{
-	sm712_writeb(fb->mmio, reg, 0x3c4);
-	sm712_writeb(fb->mmio, val, 0x3c5);
-}
-
-static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, int reg)
-{
-	sm712_writeb(fb->mmio, reg, 0x3c4);
-	return sm712_readb(fb->mmio, 0x3c5);
-}

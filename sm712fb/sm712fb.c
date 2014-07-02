@@ -56,6 +56,7 @@ struct sm712fb_info {
 };
 
 #include "sm712.h"
+#include "io.h"
 #include "modedb.h"
 
 
