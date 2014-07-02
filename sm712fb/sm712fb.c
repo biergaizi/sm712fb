@@ -751,13 +751,26 @@ static void smtc_unmap_smem(struct smtcfb_info *sfb)
 	}
 }
 
-/*
- * We need to wake up the device and make sure its in linear memory mode.
- */
-static inline void sm7xx_init_hw(void)
+static inline void sm7xx_init_hw(struct smtcfb_info *sfb)
 {
+	/* enable linear memory mode and packed pixel format */
 	outb_p(0x18, 0x3c4);
 	outb_p(0x11, 0x3c5);
+
+	/* set MCLK = 14.31818 *  (0x16 / 0x2) */
+	smtc_seqw(sfb, 0x6a, 0x16);
+	smtc_seqw(sfb, 0x6b, 0x02);
+	smtc_seqw(sfb, 0x62, 0x3e);
+
+	/* enable PCI burst */
+	smtc_seqw(sfb, 0x17, 0x20);
+
+#ifdef __BIG_ENDIAN
+	/* enable word swap */
+	if (sfb->fb.var.bits_per_pixel == 32) {
+		smtc_seqw(sfb, 0x17, 0x30);
+	}
+#endif
 }
 
 static int smtcfb_pci_probe(struct pci_dev *pdev,
@@ -787,8 +800,6 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 
 	pci_set_drvdata(pdev, sfb);
 
-	sm7xx_init_hw();
-
 	/* get mode parameter from smtc_scr_info */
 	if (smtc_scr_info.lfb_width != 0) {
 		sfb->fb.var.xres = smtc_scr_info.lfb_width;
@@ -805,6 +816,7 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 	if (sfb->fb.var.bits_per_pixel == 24)
 		sfb->fb.var.bits_per_pixel = (smtc_scr_info.lfb_depth = 32);
 #endif
+
 	/* Map address and memory detection */
 	mmio_base = pci_resource_start(pdev, 0);
 	pci_read_config_byte(pdev, PCI_REVISION_ID, &sfb->chip_rev_id);
@@ -836,17 +848,6 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 			goto failed_fb;
 		}
 
-		/* set MCLK = 14.31818 * (0x16 / 0x2) */
-		smtc_seqw(sfb, 0x6a, 0x16);
-		smtc_seqw(sfb, 0x6b, 0x02);
-		smtc_seqw(sfb, 0x62, 0x3e);
-		/* enable PCI burst */
-		smtc_seqw(sfb, 0x17, 0x20);
-		/* enable word swap */
-#ifdef __BIG_ENDIAN
-		if (sfb->fb.var.bits_per_pixel == 32)
-			smtc_seqw(sfb, 0x17, 0x30);
-#endif
 		break;
 	default:
 		dev_err(&pdev->dev,
@@ -854,6 +855,8 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 
 		goto failed_fb;
 	}
+
+	sm7xx_init_hw(sfb);
 
 	/* can support 32 bpp */
 	if (15 == sfb->fb.var.bits_per_pixel)
@@ -940,21 +943,7 @@ static int smtcfb_pci_resume(struct device *device)
 	sfb = pci_get_drvdata(pdev);
 
 	/* reinit hardware */
-	sm7xx_init_hw();
-	switch (sfb->chip_id) {
-	case 0x712:
-		/* set MCLK = 14.31818 *  (0x16 / 0x2) */
-		smtc_seqw(sfb, 0x6a, 0x16);
-		smtc_seqw(sfb, 0x6b, 0x02);
-		smtc_seqw(sfb, 0x62, 0x3e);
-		/* enable PCI burst */
-		smtc_seqw(sfb, 0x17, 0x20);
-#ifdef __BIG_ENDIAN
-		if (sfb->fb.var.bits_per_pixel == 32)
-			smtc_seqw(sfb, 0x17, 0x30);
-#endif
-		break;
-	}
+	sm7xx_init_hw(sfb);
 
 	smtc_seqw(sfb, 0x34, (smtc_seqr(sfb, 0x34) | 0xc0));
 	smtc_seqw(sfb, 0x33, ((smtc_seqr(sfb, 0x33) | 0x08) & 0xfb));
