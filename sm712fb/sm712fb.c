@@ -53,6 +53,8 @@ struct sm712fb_info {
 	u_int hz;
 
 	u32 colreg[17];
+
+	int accel;
 };
 
 #include "sm712.h"
@@ -96,6 +98,8 @@ struct vesa_mode {
 	u16  lfb_depth;
 };
 
+bool accel;
+
 static struct vesa_mode vesa_mode_table[] = {
 	{"0x301", 640,  480,  8},
 	{"0x303", 800,  600,  8},
@@ -114,6 +118,29 @@ static struct vesa_mode vesa_mode_table[] = {
 };
 
 struct screen_info sm712_scr_info;
+
+static int sm712fb_setup(char *options)
+{
+	char *this_opt;
+
+	if (!options || !*options) {
+		return 0;
+	}
+
+	while ((this_opt = strsep(&options, ",")) != NULL) {
+		if (!*this_opt) {
+			continue;
+		}
+
+		if (!strcmp(this_opt, "accel:0")) {
+			accel = false;
+		}
+		else if (!strcmp(this_opt, "accel:1")) {
+			accel = true;
+		}
+	}
+	return 0;
+}
 
 /* process command line options, get vga parameter */
 static int __init sm712_vga_setup(char *options)
@@ -690,6 +717,7 @@ static struct sm712fb_info *sm712_fb_info_new(struct pci_dev *pdev)
 	sfb->fb.var            = sm712fb_var;
 	sfb->fb.pseudo_palette = sfb->colreg;
 	sfb->fb.par            = sfb;
+	sfb->accel = accel;
 
 	return sfb;
 }
@@ -771,6 +799,13 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 	struct sm712fb_info *sfb;
 	int err;
 	unsigned long mmio_base;
+
+#ifndef MODULE
+	char *option = NULL;
+	if (!fb_get_options("sm712fb", &option)) {
+		sm712fb_setup(option);
+	}
+#endif
 
 	dev_info(&pdev->dev, "Silicon Motion display driver.");
 
@@ -962,6 +997,9 @@ static struct pci_driver sm712fb_driver = {
 };
 
 module_pci_driver(sm712fb_driver);
+
+module_param(accel, bool, 0);
+MODULE_PARM_DESC(accel, "Enable or disable 2D Acceleration");
 
 MODULE_AUTHOR("Siliconmotion ");
 MODULE_DESCRIPTION("Framebuffer driver for Silicon Motion SM712 Graphic Cards");
