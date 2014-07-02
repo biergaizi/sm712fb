@@ -57,6 +57,7 @@ struct sm712fb_info {
 
 #include "sm712.h"
 #include "io.h"
+#include "regs.h"
 #include "modedb.h"
 
 
@@ -821,16 +822,16 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 		goto failed_fb;
 	}
 
-	sfb->fb.fix.mmio_start = mmio_base + 0x00400000;
-	sfb->fb.fix.mmio_len = 0x00400000;
+	sfb->fb.fix.mmio_start = mmio_base + SM712_REG_BASE;
+	sfb->fb.fix.mmio_len = SM712_REG_SIZE;
 #ifdef __BIG_ENDIAN
 	sfb->lfb = ioremap(mmio_base, 0x00c00000);
 #else
 	sfb->lfb = ioremap(mmio_base, 0x00800000);
 #endif
-	sfb->mmio = sfb->lfb + 0x00700000;
-	sfb->dpr = sfb->lfb + 0x00408000;
-	sfb->vpr = sfb->lfb + 0x0040c000;
+	sfb->mmio = sfb->lfb + SM712_MMIO_BASE;
+	sfb->dpr = sfb->lfb + SM712_DPR_BASE;
+	sfb->vpr = sfb->lfb + SM712_VPR_BASE;
 #ifdef __BIG_ENDIAN
 	if (sfb->fb.var.bits_per_pixel == 32) {
 		sfb->lfb += 0x800000;
