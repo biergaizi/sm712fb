@@ -557,29 +557,27 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 	sm712_writeb(sfb->mmio, 0x3c2, 0x67);
 
 	/* set VPR registers */
-	writel(0x0, sfb->vpr + 0x0C);
-	writel(0x0, sfb->vpr + 0x40);
+	sm712_writel(sfb->vpr, 0x0C, 0x0);
+	sm712_writel(sfb->vpr, 0x40, 0x0);
 
 	/* set data width */
 	m_nScreenStride =
 		(sfb->width * sfb->fb.var.bits_per_pixel) / 64;
 	switch (sfb->fb.var.bits_per_pixel) {
 	case 8:
-		writel(0x0, sfb->vpr + 0x0);
+		sm712_writel(sfb->vpr, 0x0, 0x0);
 		break;
 	case 16:
-		writel(0x00020000, sfb->vpr + 0x0);
+		sm712_writel(sfb->vpr, 0x0, 0x00020000);
 		break;
 	case 24:
-		writel(0x00040000, sfb->vpr + 0x0);
+		sm712_writel(sfb->vpr, 0x0, 0x00040000);
 		break;
 	case 32:
-		writel(0x00030000, sfb->vpr + 0x0);
+		sm712_writel(sfb->vpr, 0x0, 0x00030000);
 		break;
 	}
-	writel((u32) (((m_nScreenStride + 2) << 16) | m_nScreenStride),
-	       sfb->vpr + 0x10);
-
+	sm712_writel(sfb->vpr, 0x10, (u32) (((m_nScreenStride + 2) << 16) | m_nScreenStride));
 }
 
 static void sm712fb_setmode(struct sm712fb_info *sfb)
