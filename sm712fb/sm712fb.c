@@ -90,6 +90,10 @@ static struct fb_fix_screeninfo sm712fb_fix = {
 	.ywrapstep      = 0,
 };
 
+struct screen_info sm712_scr_info;
+
+#ifdef MODULE
+
 struct vesa_mode {
 	char index[6];
 	u16  lfb_width;
@@ -97,9 +101,6 @@ struct vesa_mode {
 	u16  lfb_depth;
 };
 
-struct screen_info sm712_scr_info;
-
-#ifdef MODULE
 
 static struct vesa_mode vesa_mode_table[] = {
 	{"0x301", 640,  480,  8},
