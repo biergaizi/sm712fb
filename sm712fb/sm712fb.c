@@ -54,7 +54,7 @@ struct sm712fb_info {
 
 	u32 colreg[17];
 
-	int accel;
+	bool accel;
 };
 
 #include "sm712.h"
