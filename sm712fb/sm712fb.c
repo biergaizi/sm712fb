@@ -150,10 +150,10 @@ static void sm712_setpalette(int regno, unsigned red, unsigned green,
 	/* set bit 5:4 = 01 (write LCD RAM only) */
 	sm712_write_seq(sfb, 0x66, (sm712_read_seq(sfb, 0x66) & 0xC3) | 0x10);
 
-	sm712_writeb_mmio(sfb->mmio, regno, dac_reg);
-	sm712_writeb_mmio(sfb->mmio, red >> 10, dac_val);
-	sm712_writeb_mmio(sfb->mmio, green >> 10, dac_val);
-	sm712_writeb_mmio(sfb->mmio, blue >> 10, dac_val);
+	sm712_writeb(sfb->mmio, regno, dac_reg);
+	sm712_writeb(sfb->mmio, red >> 10, dac_val);
+	sm712_writeb(sfb->mmio, green >> 10, dac_val);
+	sm712_writeb(sfb->mmio, blue >> 10, dac_val);
 }
 
 /* chan_to_field
@@ -497,11 +497,11 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 
 		dev_dbg(&sfb->pdev->dev, "VGAMode index=%d\n", j);
 
-		sm712_writeb_mmio(sfb->mmio, 0x0, 0x3c6);
+		sm712_writeb(sfb->mmio, 0x0, 0x3c6);
 
 		sm712_write_seq(sfb, 0, 0x1);
 
-		sm712_writeb_mmio(sfb->mmio, VGAMode[j].Init_MISC, 0x3c2);
+		sm712_writeb(sfb->mmio, VGAMode[j].Init_MISC, 0x3c2);
 
 		/* init SEQ register SR00 - SR04 */
 		for (i = 0; i < SIZE_SR00_SR04; i++)
@@ -552,7 +552,7 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 			sm712_write_crtc(sfb, i + 0x90,
 				   VGAMode[j].Init_CR90_CRA7[i]);
 	}
-	sm712_writeb_mmio(sfb->mmio, 0x67, 0x3c2);
+	sm712_writeb(sfb->mmio, 0x67, 0x3c2);
 
 	/* set VPR registers */
 	writel(0x0, sfb->vpr + 0x0C);
