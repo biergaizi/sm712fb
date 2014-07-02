@@ -1,6 +1,6 @@
-#define sm712_writeb(base, dat, reg)	writeb(dat, base + reg)
-#define sm712_writew(base, dat, reg)	writew(dat, base + reg)
-#define sm712_writel(base, dat, reg)	writel(dat, base + reg)
+#define sm712_writeb(base, reg, dat)	writeb(dat, base + reg)
+#define sm712_writew(base, reg, dat)	writew(dat, base + reg)
+#define sm712_writel(base, reg, dat)	writel(dat, base + reg)
 
 #define sm712_readb(base, reg)	readb(base + reg)
 #define sm712_readw(base, reg)	readw(base + reg)
