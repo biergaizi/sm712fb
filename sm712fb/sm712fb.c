@@ -148,7 +148,7 @@ static void sm712_setpalette(int regno, unsigned red, unsigned green,
 	struct sm712fb_info *sfb = info->par;
 
 	/* set bit 5:4 = 01 (write LCD RAM only) */
-	sm712_seqw(sfb, 0x66, (sm712_seqr(sfb, 0x66) & 0xC3) | 0x10);
+	sm712_write_seq(sfb, 0x66, (sm712_read_seq(sfb, 0x66) & 0xC3) | 0x10);
 
 	sm712_writeb_mmio(sfb->mmio, regno, dac_reg);
 	sm712_writeb_mmio(sfb->mmio, red >> 10, dac_val);
@@ -179,63 +179,63 @@ static int sm712_blank(int blank_mode, struct fb_info *info)
 	switch (blank_mode) {
 	case FB_BLANK_UNBLANK:
 		/* Screen On: HSync: On, VSync : On */
-		sm712_seqw(sfb, 0x01, (sm712_seqr(sfb, 0x01) & (~0x20)));
-		sm712_seqw(sfb, 0x6a, 0x16);
-		sm712_seqw(sfb, 0x6b, 0x02);
-		sm712_seqw(sfb, 0x21, (sm712_seqr(sfb, 0x21) & 0x77));
-		sm712_seqw(sfb, 0x22, (sm712_seqr(sfb, 0x22) & (~0x30)));
-		sm712_seqw(sfb, 0x23, (sm712_seqr(sfb, 0x23) & (~0xc0)));
-		sm712_seqw(sfb, 0x24, (sm712_seqr(sfb, 0x24) | 0x01));
-		sm712_seqw(sfb, 0x31, (sm712_seqr(sfb, 0x31) | 0x03));
+		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) & (~0x20)));
+		sm712_write_seq(sfb, 0x6a, 0x16);
+		sm712_write_seq(sfb, 0x6b, 0x02);
+		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) & 0x77));
+		sm712_write_seq(sfb, 0x22, (sm712_read_seq(sfb, 0x22) & (~0x30)));
+		sm712_write_seq(sfb, 0x23, (sm712_read_seq(sfb, 0x23) & (~0xc0)));
+		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) | 0x01));
+		sm712_write_seq(sfb, 0x31, (sm712_read_seq(sfb, 0x31) | 0x03));
 		break;
 	case FB_BLANK_NORMAL:
 		/* Screen Off: HSync: On, VSync : On   Soft blank */
-		sm712_seqw(sfb, 0x01, (sm712_seqr(sfb, 0x01) & (~0x20)));
-		sm712_seqw(sfb, 0x6a, 0x16);
-		sm712_seqw(sfb, 0x6b, 0x02);
-		sm712_seqw(sfb, 0x22, (sm712_seqr(sfb, 0x22) & (~0x30)));
-		sm712_seqw(sfb, 0x23, (sm712_seqr(sfb, 0x23) & (~0xc0)));
-		sm712_seqw(sfb, 0x24, (sm712_seqr(sfb, 0x24) | 0x01));
-		sm712_seqw(sfb, 0x31, ((sm712_seqr(sfb, 0x31) & (~0x07)) | 0x00));
+		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) & (~0x20)));
+		sm712_write_seq(sfb, 0x6a, 0x16);
+		sm712_write_seq(sfb, 0x6b, 0x02);
+		sm712_write_seq(sfb, 0x22, (sm712_read_seq(sfb, 0x22) & (~0x30)));
+		sm712_write_seq(sfb, 0x23, (sm712_read_seq(sfb, 0x23) & (~0xc0)));
+		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) | 0x01));
+		sm712_write_seq(sfb, 0x31, ((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
 		break;
 	case FB_BLANK_VSYNC_SUSPEND:
 		/* Screen On: HSync: On, VSync : Off */
-		sm712_seqw(sfb, 0x01, (sm712_seqr(sfb, 0x01) | 0x20));
-		sm712_seqw(sfb, 0x20, (sm712_seqr(sfb, 0x20) & (~0xB0)));
-		sm712_seqw(sfb, 0x6a, 0x0c);
-		sm712_seqw(sfb, 0x6b, 0x02);
-		sm712_seqw(sfb, 0x21, (sm712_seqr(sfb, 0x21) | 0x88));
-		sm712_seqw(sfb, 0x22, ((sm712_seqr(sfb, 0x22) & (~0x30)) | 0x20));
-		sm712_seqw(sfb, 0x23, ((sm712_seqr(sfb, 0x23) & (~0xc0)) | 0x20));
-		sm712_seqw(sfb, 0x24, (sm712_seqr(sfb, 0x24) & (~0x01)));
-		sm712_seqw(sfb, 0x31, ((sm712_seqr(sfb, 0x31) & (~0x07)) | 0x00));
-		sm712_seqw(sfb, 0x34, (sm712_seqr(sfb, 0x34) | 0x80));
+		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
+		sm712_write_seq(sfb, 0x20, (sm712_read_seq(sfb, 0x20) & (~0xB0)));
+		sm712_write_seq(sfb, 0x6a, 0x0c);
+		sm712_write_seq(sfb, 0x6b, 0x02);
+		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
+		sm712_write_seq(sfb, 0x22, ((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x20));
+		sm712_write_seq(sfb, 0x23, ((sm712_read_seq(sfb, 0x23) & (~0xc0)) | 0x20));
+		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) & (~0x01)));
+		sm712_write_seq(sfb, 0x31, ((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
+		sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0x80));
 		break;
 	case FB_BLANK_HSYNC_SUSPEND:
 		/* Screen On: HSync: Off, VSync : On */
-		sm712_seqw(sfb, 0x01, (sm712_seqr(sfb, 0x01) | 0x20));
-		sm712_seqw(sfb, 0x20, (sm712_seqr(sfb, 0x20) & (~0xB0)));
-		sm712_seqw(sfb, 0x6a, 0x0c);
-		sm712_seqw(sfb, 0x6b, 0x02);
-		sm712_seqw(sfb, 0x21, (sm712_seqr(sfb, 0x21) | 0x88));
-		sm712_seqw(sfb, 0x22, ((sm712_seqr(sfb, 0x22) & (~0x30)) | 0x10));
-		sm712_seqw(sfb, 0x23, ((sm712_seqr(sfb, 0x23) & (~0xc0)) | 0xD8));
-		sm712_seqw(sfb, 0x24, (sm712_seqr(sfb, 0x24) & (~0x01)));
-		sm712_seqw(sfb, 0x31, ((sm712_seqr(sfb, 0x31) & (~0x07)) | 0x00));
-		sm712_seqw(sfb, 0x34, (sm712_seqr(sfb, 0x34) | 0x80));
+		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
+		sm712_write_seq(sfb, 0x20, (sm712_read_seq(sfb, 0x20) & (~0xB0)));
+		sm712_write_seq(sfb, 0x6a, 0x0c);
+		sm712_write_seq(sfb, 0x6b, 0x02);
+		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
+		sm712_write_seq(sfb, 0x22, ((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x10));
+		sm712_write_seq(sfb, 0x23, ((sm712_read_seq(sfb, 0x23) & (~0xc0)) | 0xD8));
+		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) & (~0x01)));
+		sm712_write_seq(sfb, 0x31, ((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
+		sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0x80));
 		break;
 	case FB_BLANK_POWERDOWN:
 		/* Screen On: HSync: Off, VSync : Off */
-		sm712_seqw(sfb, 0x01, (sm712_seqr(sfb, 0x01) | 0x20));
-		sm712_seqw(sfb, 0x20, (sm712_seqr(sfb, 0x20) & (~0xB0)));
-		sm712_seqw(sfb, 0x6a, 0x0c);
-		sm712_seqw(sfb, 0x6b, 0x02);
-		sm712_seqw(sfb, 0x21, (sm712_seqr(sfb, 0x21) | 0x88));
-		sm712_seqw(sfb, 0x22, ((sm712_seqr(sfb, 0x22) & (~0x30)) | 0x30));
-		sm712_seqw(sfb, 0x23, ((sm712_seqr(sfb, 0x23) & (~0xc0)) | 0xD8));
-		sm712_seqw(sfb, 0x24, (sm712_seqr(sfb, 0x24) & (~0x01)));
-		sm712_seqw(sfb, 0x31, ((sm712_seqr(sfb, 0x31) & (~0x07)) | 0x00));
-		sm712_seqw(sfb, 0x34, (sm712_seqr(sfb, 0x34) | 0x80));
+		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
+		sm712_write_seq(sfb, 0x20, (sm712_read_seq(sfb, 0x20) & (~0xB0)));
+		sm712_write_seq(sfb, 0x6a, 0x0c);
+		sm712_write_seq(sfb, 0x6b, 0x02);
+		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
+		sm712_write_seq(sfb, 0x22, ((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x30));
+		sm712_write_seq(sfb, 0x23, ((sm712_read_seq(sfb, 0x23) & (~0xc0)) | 0xD8));
+		sm712_write_seq(sfb, 0x24, (sm712_read_seq(sfb, 0x24) & (~0x01)));
+		sm712_write_seq(sfb, 0x31, ((sm712_read_seq(sfb, 0x31) & (~0x07)) | 0x00));
+		sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0x80));
 		break;
 	default:
 		return -EINVAL;
@@ -499,17 +499,17 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 
 		sm712_writeb_mmio(sfb->mmio, 0x0, 0x3c6);
 
-		sm712_seqw(sfb, 0, 0x1);
+		sm712_write_seq(sfb, 0, 0x1);
 
 		sm712_writeb_mmio(sfb->mmio, VGAMode[j].Init_MISC, 0x3c2);
 
 		/* init SEQ register SR00 - SR04 */
 		for (i = 0; i < SIZE_SR00_SR04; i++)
-			sm712_seqw(sfb, i, VGAMode[j].Init_SR00_SR04[i]);
+			sm712_write_seq(sfb, i, VGAMode[j].Init_SR00_SR04[i]);
 
 		/* init SEQ register SR10 - SR24 */
 		for (i = 0; i < SIZE_SR10_SR24; i++)
-			sm712_seqw(sfb, i + 0x10,
+			sm712_write_seq(sfb, i + 0x10,
 				  VGAMode[j].Init_SR10_SR24[i]);
 
 		/* init SEQ register SR30 - SR75 */
@@ -517,39 +517,39 @@ static void sm712_set_timing(struct sm712fb_info *sfb)
 			if ((i + 0x30) != 0x62 &&
 			    (i + 0x30) != 0x6a &&
 			    (i + 0x30) != 0x6b)
-				sm712_seqw(sfb, i + 0x30,
+				sm712_write_seq(sfb, i + 0x30,
 					VGAMode[j].Init_SR30_SR75[i]);
 
 		/* init SEQ register SR80 - SR93 */
 		for (i = 0; i < SIZE_SR80_SR93; i++)
-			sm712_seqw(sfb, i + 0x80,
+			sm712_write_seq(sfb, i + 0x80,
 				  VGAMode[j].Init_SR80_SR93[i]);
 
 		/* init SEQ register SRA0 - SRAF */
 		for (i = 0; i < SIZE_SRA0_SRAF; i++)
-			sm712_seqw(sfb, i + 0xa0,
+			sm712_write_seq(sfb, i + 0xa0,
 				  VGAMode[j].Init_SRA0_SRAF[i]);
 
 		/* init Graphic register GR00 - GR08 */
 		for (i = 0; i < SIZE_GR00_GR08; i++)
-			sm712_grphw(sfb, i, VGAMode[j].Init_GR00_GR08[i]);
+			sm712_write_grph(sfb, i, VGAMode[j].Init_GR00_GR08[i]);
 
 		/* init Attribute register AR00 - AR14 */
 		for (i = 0; i < SIZE_AR00_AR14; i++)
-			sm712_attrw(sfb, i, VGAMode[j].Init_AR00_AR14[i]);
+			sm712_write_attr(sfb, i, VGAMode[j].Init_AR00_AR14[i]);
 
 		/* init CRTC register CR00 - CR18 */
 		for (i = 0; i < SIZE_CR00_CR18; i++)
-			sm712_crtcw(sfb, i, VGAMode[j].Init_CR00_CR18[i]);
+			sm712_write_crtc(sfb, i, VGAMode[j].Init_CR00_CR18[i]);
 
 		/* init CRTC register CR30 - CR4D */
 		for (i = 0; i < SIZE_CR30_CR4D; i++)
-			sm712_crtcw(sfb, i + 0x30,
+			sm712_write_crtc(sfb, i + 0x30,
 				   VGAMode[j].Init_CR30_CR4D[i]);
 
 		/* init CRTC register CR90 - CRA7 */
 		for (i = 0; i < SIZE_CR90_CRA7; i++)
-			sm712_crtcw(sfb, i + 0x90,
+			sm712_write_crtc(sfb, i + 0x90,
 				   VGAMode[j].Init_CR90_CRA7[i]);
 	}
 	sm712_writeb_mmio(sfb->mmio, 0x67, 0x3c2);
@@ -751,17 +751,17 @@ static inline void sm712_init_hw(struct sm712fb_info *sfb)
 	outb_p(0x11, 0x3c5);
 
 	/* set MCLK = 14.31818 *  (0x16 / 0x2) */
-	sm712_seqw(sfb, 0x6a, 0x16);
-	sm712_seqw(sfb, 0x6b, 0x02);
-	sm712_seqw(sfb, 0x62, 0x3e);
+	sm712_write_seq(sfb, 0x6a, 0x16);
+	sm712_write_seq(sfb, 0x6b, 0x02);
+	sm712_write_seq(sfb, 0x62, 0x3e);
 
 	/* enable PCI burst */
-	sm712_seqw(sfb, 0x17, 0x20);
+	sm712_write_seq(sfb, 0x17, 0x20);
 
 #ifdef __BIG_ENDIAN
 	/* enable word swap */
 	if (sfb->fb.var.bits_per_pixel == 32) {
-		sm712_seqw(sfb, 0x17, 0x30);
+		sm712_write_seq(sfb, 0x17, 0x30);
 	}
 #endif
 }
@@ -910,15 +910,15 @@ static int sm712fb_pci_suspend(struct device *device)
 	/* set the hw in sleep mode use external clock and self memory refresh
 	 * so that we can turn off internal PLLs later on
 	 */
-	sm712_seqw(sfb, 0x20, (sm712_seqr(sfb, 0x20) | 0xc0));
-	sm712_seqw(sfb, 0x69, (sm712_seqr(sfb, 0x69) & 0xf7));
+	sm712_write_seq(sfb, 0x20, (sm712_read_seq(sfb, 0x20) | 0xc0));
+	sm712_write_seq(sfb, 0x69, (sm712_read_seq(sfb, 0x69) & 0xf7));
 
 	console_lock();
 	fb_set_suspend(&sfb->fb, 1);
 	console_unlock();
 
 	/* additionally turn off all function blocks including internal PLLs */
-	sm712_seqw(sfb, 0x21, 0xff);
+	sm712_write_seq(sfb, 0x21, 0xff);
 
 	return 0;
 }
@@ -933,8 +933,8 @@ static int sm712fb_pci_resume(struct device *device)
 	/* reinit hardware */
 	sm712_init_hw(sfb);
 
-	sm712_seqw(sfb, 0x34, (sm712_seqr(sfb, 0x34) | 0xc0));
-	sm712_seqw(sfb, 0x33, ((sm712_seqr(sfb, 0x33) | 0x08) & 0xfb));
+	sm712_write_seq(sfb, 0x34, (sm712_read_seq(sfb, 0x34) | 0xc0));
+	sm712_write_seq(sfb, 0x33, ((sm712_read_seq(sfb, 0x33) | 0x08) & 0xfb));
 
 	sm712fb_setmode(sfb);
 

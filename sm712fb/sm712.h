@@ -48,31 +48,31 @@
 #define SIZE_VPR		(0x6C + 1)
 #define SIZE_DPR		(0x44 + 1)
 
-static inline void sm712_crtcw(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_crtc(struct sm712fb_info *fb, int reg, int val)
 {
 	sm712_writeb_mmio(fb->mmio, reg, 0x3d4);
 	sm712_writeb_mmio(fb->mmio, val, 0x3d5);
 }
 
-static inline unsigned int sm712_crtcr(struct sm712fb_info *fb, int reg)
+static inline unsigned int sm712_read_crtc(struct sm712fb_info *fb, int reg)
 {
 	sm712_writeb_mmio(fb->mmio, reg, 0x3d4);
 	return sm712_readb_mmio(fb->mmio, 0x3d5);
 }
 
-static inline void sm712_grphw(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_grph(struct sm712fb_info *fb, int reg, int val)
 {
 	sm712_writeb_mmio(fb->mmio, reg, 0x3ce);
 	sm712_writeb_mmio(fb->mmio, val, 0x3cf);
 }
 
-static inline unsigned int sm712_grphr(struct sm712fb_info *fb, int reg)
+static inline unsigned int sm712_read_grph(struct sm712fb_info *fb, int reg)
 {
 	sm712_writeb_mmio(fb->mmio, reg, 0x3ce);
 	return sm712_readb_mmio(fb->mmio, 0x3cf);
 }
 
-static inline void sm712_attrw(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_attr(struct sm712fb_info *fb, int reg, int val)
 {
 	sm712_readb_mmio(fb->mmio, 0x3da);
 	sm712_writeb_mmio(fb->mmio, reg, 0x3c0);
@@ -80,13 +80,13 @@ static inline void sm712_attrw(struct sm712fb_info *fb, int reg, int val)
 	sm712_writeb_mmio(fb->mmio, val, 0x3c0);
 }
 
-static inline void sm712_seqw(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_seq(struct sm712fb_info *fb, int reg, int val)
 {
 	sm712_writeb_mmio(fb->mmio, reg, 0x3c4);
 	sm712_writeb_mmio(fb->mmio, val, 0x3c5);
 }
 
-static inline unsigned int sm712_seqr(struct sm712fb_info *fb, int reg)
+static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, int reg)
 {
 	sm712_writeb_mmio(fb->mmio, reg, 0x3c4);
 	return sm712_readb_mmio(fb->mmio, 0x3c5);
