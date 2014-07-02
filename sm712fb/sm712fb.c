@@ -580,11 +580,6 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 
 }
 
-static void smtc_set_timing(struct smtcfb_info *sfb)
-{
-	sm7xx_set_timing(sfb);
-}
-
 static void smtcfb_setmode(struct smtcfb_info *sfb)
 {
 	switch (sfb->fb.var.bits_per_pixel) {
@@ -634,7 +629,7 @@ static void smtcfb_setmode(struct smtcfb_info *sfb)
 	sfb->width  = sfb->fb.var.xres;
 	sfb->height = sfb->fb.var.yres;
 	sfb->hz = 60;
-	smtc_set_timing(sfb);
+	sm7xx_set_timing(sfb);
 }
 
 static int smtc_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
