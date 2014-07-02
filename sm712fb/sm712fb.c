@@ -115,7 +115,6 @@ static struct vesa_mode vesa_mode_table[] = {
 
 struct screen_info sm712_scr_info;
 
-#ifdef MODULE
 /* process command line options, get vga parameter */
 static int __init sm712_vga_setup(char *options)
 {
@@ -143,7 +142,6 @@ static int __init sm712_vga_setup(char *options)
 	return -1;
 }
 __setup("vga=", sm712_vga_setup);
-#endif
 
 static void sm712_setpalette(int regno, unsigned red, unsigned green,
 			     unsigned blue, struct fb_info *info)
