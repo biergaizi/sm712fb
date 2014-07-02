@@ -11,6 +11,9 @@
  * Copyright (C) 2011 Igalia, S.L.
  * Author:   Javier M. Mellid <jmunhoz@igalia.com>
  *
+ * Copyright (C) 2014 Tom Li.
+ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
+ *
  * This file is subject to the terms and conditions of the GNU General Public
  * License. See the file COPYING in the main directory of this archive for
  * more details.
