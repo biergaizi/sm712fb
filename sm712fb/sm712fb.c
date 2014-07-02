@@ -701,7 +701,7 @@ static struct sm712fb_info *sm712_fb_info_new(struct pci_dev *pdev)
 /*
  * free struct sm712fb_info
  */
-static void sm712_free_fb_info(struct sm712fb_info *sfb)
+static void sm712_fb_info_free(struct sm712fb_info *sfb)
 {
 	kfree(sfb);
 }
@@ -877,7 +877,7 @@ fail:
 
 	sm712_unmap_smem(sfb);
 fb_fail:
-	sm712_free_fb_info(sfb);
+	sm712_fb_info_free(sfb);
 free_fail:
 	pci_disable_device(pdev);
 
@@ -899,7 +899,7 @@ static void sm712fb_pci_remove(struct pci_dev *pdev)
 	sfb = pci_get_drvdata(pdev);
 	sm712_unmap_smem(sfb);
 	unregister_framebuffer(&sfb->fb);
-	sm712_free_fb_info(sfb);
+	sm712_fb_info_free(sfb);
 }
 
 #ifdef CONFIG_PM
