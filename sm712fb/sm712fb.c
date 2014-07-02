@@ -485,7 +485,7 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 		    VGAMode[j].mmSizeY != sfb->height ||
 		    VGAMode[j].bpp != sfb->fb.var.bits_per_pixel ||
 		    VGAMode[j].hz != sfb->hz) {
-			continue
+			continue;
 		}
 
 		dev_dbg(&sfb->pdev->dev,
@@ -774,7 +774,6 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 				   const struct pci_device_id *ent)
 {
 	struct smtcfb_info *sfb;
-	u_long smem_size = 0x00800000;	/* default 8MB */
 	int err;
 	unsigned long mmio_base;
 
@@ -827,7 +826,6 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 
 	sfb->fb.fix.mmio_start = mmio_base + 0x00400000;
 	sfb->fb.fix.mmio_len = 0x00400000;
-	smem_size = SM712_VIDEOMEMORYSIZE;
 #ifdef __BIG_ENDIAN
 	sfb->lfb = ioremap(mmio_base, 0x00c00000);
 #else
@@ -858,7 +856,7 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 
 	sfb->fb.var.xres_virtual = sfb->fb.var.xres;
 	sfb->fb.var.yres_virtual = sfb->fb.var.yres;
-	err = smtc_map_smem(sfb, pdev, smem_size);
+	err = smtc_map_smem(sfb, pdev, SM712_VIDEOMEMORYSIZE);
 	if (err)
 		goto failed;
 
