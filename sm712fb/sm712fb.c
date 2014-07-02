@@ -1184,7 +1184,7 @@ static struct pci_driver sm712fb_driver = {
 
 module_pci_driver(sm712fb_driver);
 
-module_param(accel, bool, 0);
+module_param(accel, bool, 444);
 MODULE_PARM_DESC(accel, "Enable or disable 2D Acceleration");
 
 MODULE_AUTHOR("Siliconmotion ");
