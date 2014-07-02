@@ -788,7 +788,7 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 
 	if (!sfb) {
 		err = -ENOMEM;
-		goto failed_free;
+		goto free_fail;
 	}
 
 	sfb->chip_id = ent->device;
@@ -820,7 +820,7 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 		dev_err(&pdev->dev,
 			"No valid Silicon Motion display chip was detected!");
 
-		goto failed_fb;
+		goto fb_fail;
 	}
 
 	sfb->fb.fix.mmio_start = mmio_base + SM712_REG_BASE;
@@ -844,7 +844,7 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 			"%s: unable to map memory mapped IO!",
 			sfb->fb.fix.id);
 		err = -ENOMEM;
-		goto failed_fb;
+		goto fb_fail;
 	}
 
 	sm712_init_hw(sfb);
@@ -857,13 +857,13 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 	sfb->fb.var.yres_virtual = sfb->fb.var.yres;
 	err = sm712_map_smem(sfb, pdev, SM712_VIDEOMEMORYSIZE);
 	if (err)
-		goto failed;
+		goto fail;
 
 	sm712fb_setmode(sfb);
 
 	err = register_framebuffer(&sfb->fb);
 	if (err < 0)
-		goto failed;
+		goto fail;
 
 	dev_info(&pdev->dev,
 		 "Silicon Motion SM%X Rev%X primary display mode %dx%d-%d Init Complete.",
@@ -872,13 +872,13 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 
 	return 0;
 
-failed:
+fail:
 	dev_err(&pdev->dev, "Silicon Motion, Inc. primary display init fail.");
 
 	sm712_unmap_smem(sfb);
-failed_fb:
+fb_fail:
 	sm712_free_fb_info(sfb);
-failed_free:
+free_fail:
 	pci_disable_device(pdev);
 
 	return err;
