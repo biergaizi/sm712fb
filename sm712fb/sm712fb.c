@@ -60,7 +60,6 @@ struct sm712fb_info {
 #include "regs.h"
 #include "modedb.h"
 
-
 static struct fb_var_screeninfo sm712fb_var = {
 	.xres           = 1024,
 	.yres           = 600,
