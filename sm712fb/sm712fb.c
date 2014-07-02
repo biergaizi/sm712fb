@@ -47,6 +47,7 @@ struct sm712fb_info {
 	void __iomem *vpr;	/* video processor control regs */
 	void __iomem *cpr;	/* capture processor control regs */
 	void __iomem *mmio;	/* memory map IO port */
+	void __iomem *dataport; /* 2d engine data port */
 
 	u_int width;
 	u_int height;
@@ -864,6 +865,7 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 	sfb->mmio = sfb->lfb + SM712_MMIO_BASE;
 	sfb->dpr = sfb->lfb + SM712_DPR_BASE;
 	sfb->vpr = sfb->lfb + SM712_VPR_BASE;
+	sfb->dataport = sfb->lfb + SM712_DATAPORT_BASE;
 #ifdef __BIG_ENDIAN
 	if (sfb->fb.var.bits_per_pixel == 32) {
 		sfb->lfb += 0x800000;

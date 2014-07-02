@@ -50,3 +50,8 @@ static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, int reg)
 	sm712_writeb(fb->mmio, 0x3c4, reg);
 	return sm712_readb(fb->mmio, 0x3c5);
 }
+
+static inline void sm712_write_dataport(struct sm712fb_info *fb, long int val)
+{
+	sm712_writel(fb->dataport, 0, val);
+}

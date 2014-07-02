@@ -9,6 +9,8 @@
 #define	SM712_VPR_BASE			0x0040c000
 #define SM712_VPR_SIZE                  (0x44 + 1)
 
+#define SM712_DATAPORT_BASE             0x00400000
+
 #define SR00_SR04_SIZE      (0x04 - 0x00 + 1)
 #define SR10_SR24_SIZE      (0x24 - 0x10 + 1)
 #define SR30_SR75_SIZE      (0x75 - 0x30 + 1)
