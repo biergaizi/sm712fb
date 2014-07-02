@@ -580,11 +580,7 @@ static void sm7xx_set_timing(struct smtcfb_info *sfb)
 
 static void smtc_set_timing(struct smtcfb_info *sfb)
 {
-	switch (sfb->chip_id) {
-	case 0x712:
-		sm7xx_set_timing(sfb);
-		break;
-	}
+	sm7xx_set_timing(sfb);
 }
 
 static void smtcfb_setmode(struct smtcfb_info *sfb)
@@ -821,38 +817,35 @@ static int smtcfb_pci_probe(struct pci_dev *pdev,
 	mmio_base = pci_resource_start(pdev, 0);
 	pci_read_config_byte(pdev, PCI_REVISION_ID, &sfb->chip_rev_id);
 
-	switch (sfb->chip_id) {
-	case 0x712:
-		sfb->fb.fix.mmio_start = mmio_base + 0x00400000;
-		sfb->fb.fix.mmio_len = 0x00400000;
-		smem_size = SM712_VIDEOMEMORYSIZE;
-#ifdef __BIG_ENDIAN
-		sfb->lfb = ioremap(mmio_base, 0x00c00000);
-#else
-		sfb->lfb = ioremap(mmio_base, 0x00800000);
-#endif
-		sfb->mmio = sfb->lfb + 0x00700000;
-		sfb->dpr = sfb->lfb + 0x00408000;
-		sfb->vpr = sfb->lfb + 0x0040c000;
-#ifdef __BIG_ENDIAN
-		if (sfb->fb.var.bits_per_pixel == 32) {
-			sfb->lfb += 0x800000;
-			dev_info(&pdev->dev, "sfb->lfb=%p", sfb->lfb);
-		}
-#endif
-		if (!sfb->mmio) {
-			dev_err(&pdev->dev,
-				"%s: unable to map memory mapped IO!",
-				sfb->fb.fix.id);
-			err = -ENOMEM;
-			goto failed_fb;
-		}
-
-		break;
-	default:
+	if (sfb->chip_id != 0x712) {
 		dev_err(&pdev->dev,
 			"No valid Silicon Motion display chip was detected!");
 
+		goto failed_fb;
+	}
+
+	sfb->fb.fix.mmio_start = mmio_base + 0x00400000;
+	sfb->fb.fix.mmio_len = 0x00400000;
+	smem_size = SM712_VIDEOMEMORYSIZE;
+#ifdef __BIG_ENDIAN
+	sfb->lfb = ioremap(mmio_base, 0x00c00000);
+#else
+	sfb->lfb = ioremap(mmio_base, 0x00800000);
+#endif
+	sfb->mmio = sfb->lfb + 0x00700000;
+	sfb->dpr = sfb->lfb + 0x00408000;
+	sfb->vpr = sfb->lfb + 0x0040c000;
+#ifdef __BIG_ENDIAN
+	if (sfb->fb.var.bits_per_pixel == 32) {
+		sfb->lfb += 0x800000;
+		dev_info(&pdev->dev, "sfb->lfb=%p", sfb->lfb);
+	}
+#endif
+	if (!sfb->mmio) {
+		dev_err(&pdev->dev,
+			"%s: unable to map memory mapped IO!",
+			sfb->fb.fix.id);
+		err = -ENOMEM;
 		goto failed_fb;
 	}
 
