@@ -97,6 +97,10 @@ struct vesa_mode {
 	u16  lfb_depth;
 };
 
+struct screen_info sm712_scr_info;
+
+#ifdef MODULE
+
 static struct vesa_mode vesa_mode_table[] = {
 	{"0x301", 640,  480,  8},
 	{"0x303", 800,  600,  8},
@@ -114,9 +118,6 @@ static struct vesa_mode vesa_mode_table[] = {
 	{"0x31B", 1280, 1024, 24},
 };
 
-struct screen_info sm712_scr_info;
-
-#ifdef MODULE
 /* process command line options, get vga parameter */
 static int __init sm712_vga_setup(char *options)
 {
