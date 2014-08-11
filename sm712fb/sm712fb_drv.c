@@ -37,7 +37,7 @@
 #endif
 
 #include "sm712fb_drv.h"
-#include "modedb.h"
+#include "sm712fb_modedb.h"
 
 static struct fb_var_screeninfo sm712fb_var = {
 	.xres           = 1024,
