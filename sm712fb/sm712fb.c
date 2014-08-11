@@ -63,7 +63,6 @@ struct sm712fb_info {
 	spinlock_t accel_lock;  /* locked when drawing engine is working */
 };
 
-#include "sm712.h"
 #include "io.h"
 #include "regs.h"
 #include "modedb.h"
