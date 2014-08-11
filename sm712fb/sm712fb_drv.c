@@ -770,33 +770,19 @@ static inline void sm712_init_hw(struct sm712fb_info *sfb)
 #endif
 
 	if (!sfb->accel) {
-		printk("sm712fb: disabled 2d acceleration.\n");
+		printk("sm712fb: 2d acceleration was disabled by user.\n");
 		return;
 	}
 
-	if (sm712fb_wait(sfb) == 0) {
-		sm712_write_dpr(sfb, DPR_CROP_TOPLEFT_COORDS, DPR_COORDS(0, 0));
-
-		/* same width for DPR_PITCH and DPR_SRC_WINDOW */
-		sm712_write_dpr(sfb, DPR_PITCH,
-		    DPR_COORDS(sfb->fb.var.xres, sfb->fb.var.xres));
-		sm712_write_dpr(sfb, DPR_SRC_WINDOW,
-		    DPR_COORDS(sfb->fb.var.xres, sfb->fb.var.xres));
-
-		sm712_write_dpr(sfb, DPR_BYTE_BIT_MASK, 0xffffffff);
-		sm712_write_dpr(sfb, DPR_COLOR_COMPARE_MASK, 0);
-		sm712_write_dpr(sfb, DPR_COLOR_COMPARE, 0);
-		sm712_write_dpr(sfb, DPR_SRC_BASE, 0);
-		sm712_write_dpr(sfb, DPR_DST_BASE, 0);
-
+	if (sm712fb_init_accel(sfb) < 0) {
+		printk("sm712fb: failed to enable 2d accleration.\n");
+		return;
+	}
+	else {
 		sm712fb_ops.fb_fillrect = sm712fb_fillrect;
 		sm712fb_ops.fb_copyarea = sm712fb_copyarea;
 		sm712fb_ops.fb_imageblit = sm712fb_imageblit;
-
-		printk("sm712fb: enabled 2d acceleration.\n");
-	}
-	else {
-		printk("sm712fb: failed to enable 2d accleration.\n");
+		printk("sm712fb: enable 2d acceleration.\n");
 	}
 }
 

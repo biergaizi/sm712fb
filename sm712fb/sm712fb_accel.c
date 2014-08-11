@@ -27,6 +27,29 @@
 #include <linux/delay.h>
 
 #include "sm712fb_drv.h"
+#include "sm712fb_accel.h"
+
+int sm712fb_init_accel(struct sm712fb_info *fb)
+{
+	if (sm712fb_wait(fb) != 0) {
+		return -1;
+	}
+
+	sm712_write_dpr(fb, DPR_CROP_TOPLEFT_COORDS, DPR_COORDS(0, 0));
+
+	/* same width for DPR_PITCH and DPR_SRC_WINDOW */
+	sm712_write_dpr(fb, DPR_PITCH,
+			DPR_COORDS(fb->fb.var.xres, fb->fb.var.xres));
+	sm712_write_dpr(fb, DPR_SRC_WINDOW,
+			DPR_COORDS(fb->fb.var.xres, fb->fb.var.xres));
+
+	sm712_write_dpr(fb, DPR_BYTE_BIT_MASK, 0xffffffff);
+	sm712_write_dpr(fb, DPR_COLOR_COMPARE_MASK, 0);
+	sm712_write_dpr(fb, DPR_COLOR_COMPARE, 0);
+	sm712_write_dpr(fb, DPR_SRC_BASE, 0);
+	sm712_write_dpr(fb, DPR_DST_BASE, 0);
+	return 0;
+}
 
 int sm712fb_wait(struct sm712fb_info *fb)
 {
