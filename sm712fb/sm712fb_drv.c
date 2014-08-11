@@ -37,7 +37,7 @@
 #endif
 
 #include "sm712fb_drv.h"
-#include "io.h"
+#include "sm712fb_io.h"
 #include "regs.h"
 #include "modedb.h"
 
