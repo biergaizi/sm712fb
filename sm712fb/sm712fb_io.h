@@ -1,3 +1,26 @@
+/*
+ * Silicon Motion SM712 frame buffer device
+ *
+ * Copyright (C) 2006 Silicon Motion Technology Corp.
+ * Authors:  Ge Wang, gewang@siliconmotion.com
+ *	     Boyod boyod.yang@siliconmotion.com.cn
+ *
+ * Copyright (C) 2009 Lemote, Inc.
+ * Author:   Wu Zhangjin, wuzhangjin@gmail.com
+ *
+ * Copyright (C) 2011 Igalia, S.L.
+ * Author:   Javier M. Mellid <jmunhoz@igalia.com>
+ *
+ * Copyright (C) 2014 Tom Li.
+ * Author:   Tom Li (Yifeng Li) <biergaizi@member.fsf.org>
+ *
+ * This file is subject to the terms and conditions of the GNU General Public
+ * License. See the file COPYING in the main directory of this archive for
+ * more details.
+ *
+ */
+
+
 #define sm712_writeb(base, reg, dat)	writeb(dat, base + reg)
 #define sm712_writew(base, reg, dat)	writew(dat, base + reg)
 #define sm712_writel(base, reg, dat)	writel(dat, base + reg)
