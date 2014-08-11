@@ -33,7 +33,7 @@ int sm712fb_wait(struct sm712fb_info *fb)
 	int i;
 	u32 reg;
 
-	for (i = 10000; i > 0; i--) {
+	for (i = 0; i < 10000; i++) {
 		reg = sm712_read_seq(fb, 0x16);
 		if ((reg & 0x18) == 0x10)
 			return 0;
