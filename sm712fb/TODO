@@ -1,6 +1,5 @@
 TODO:
 - Dual head support
-- 2D acceleration support
 - use kernel coding style
 - refine the code and remove unused code
 - move it to drivers/video/sm7xxfb.c
