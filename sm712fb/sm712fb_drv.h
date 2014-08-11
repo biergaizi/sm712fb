@@ -55,9 +55,11 @@ struct sm712fb_info {
 
 #include "sm712fb_io.h"
 
-#define SM712_DEFAULT_WIDTH		1024
-#define SM712_DEFAULT_HEIGHT		600
-#define SM712_DEFAULT_DEPTH		16
+#define FB_ACCEL_SMI_LYNX		88
+
+#define SM712_DEFAULT_XRES		1024
+#define SM712_DEFAULT_YRES		600
+#define SM712_DEFAULT_BPP		16
 
 #define SM712_VRAM_SIZE			0x00400000
 

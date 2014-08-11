@@ -992,9 +992,9 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 		sfb->fb.var.bits_per_pixel = sm712_scr_info.lfb_depth;
 	} else {
 		/* default resolution 1024x600 16bit mode */
-		sfb->fb.var.xres = SCREEN_X_RES;
-		sfb->fb.var.yres = SCREEN_Y_RES;
-		sfb->fb.var.bits_per_pixel = SCREEN_BPP;
+		sfb->fb.var.xres = SM712_DEFAULT_XRES;
+		sfb->fb.var.yres = SM712_DEFAULT_YRES;
+		sfb->fb.var.bits_per_pixel = SM712_DEFAULT_BPP;
 	}
 
 #ifdef __BIG_ENDIAN
@@ -1046,7 +1046,7 @@ static int sm712fb_pci_probe(struct pci_dev *pdev,
 
 	sfb->fb.var.xres_virtual = sfb->fb.var.xres;
 	sfb->fb.var.yres_virtual = sfb->fb.var.yres;
-	err = sm712_map_smem(sfb, pdev, SM712_VIDEOMEMORYSIZE);
+	err = sm712_map_smem(sfb, pdev, SM712_VRAM_SIZE);
 	if (err)
 		goto fail;
 
