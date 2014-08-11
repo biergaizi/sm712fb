@@ -13,8 +13,6 @@
  *  more details.
  */
 
-#define NR_PALETTE        256
-
 #define FB_ACCEL_SMI_LYNX 88
 
 #define SCREEN_X_RES      1024
