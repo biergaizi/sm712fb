@@ -170,6 +170,10 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 		bg_color = image->bg_color;
 	}
 
+	/* Q: What does the code below actually do?
+	 * A: I don't know, don't ask me.
+	 * TODO: We need clear comments here.  */
+
 	ubytes_per_scan = (width + 0 + 7) / 8; /* start_bit = 0 */
 	u4bytes_per_scan = ubytes_per_scan & ~3;
 	ubytes_remain = ubytes_per_scan & 3;
