@@ -36,33 +36,7 @@
 #include <linux/pm.h>
 #endif
 
-/*
-* Private structure
-*/
-struct sm712fb_info {
-	struct pci_dev *pdev;
-	struct fb_info fb;
-	u16 chip_id;
-	u8  chip_rev_id;
-
-	void __iomem *lfb;	/* linear frame buffer, the base address */
-
-	void __iomem *dpr;	/* drawing processor control regs */
-	void __iomem *vpr;	/* video processor control regs */
-	void __iomem *cpr;	/* capture processor control regs */
-	void __iomem *mmio;	/* memory map IO port */
-	void __iomem *dataport; /* 2d drawing engine data port */
-
-	u_int width;
-	u_int height;
-	u_int hz;
-
-	u32 colreg[17];
-
-	bool accel;
-	spinlock_t accel_lock;  /* locked when drawing engine is working */
-};
-
+#include "sm712fb_drv.h"
 #include "io.h"
 #include "regs.h"
 #include "modedb.h"
