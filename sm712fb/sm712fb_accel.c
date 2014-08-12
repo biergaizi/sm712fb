@@ -154,7 +154,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 
 	int i, j;
 	unsigned int ubytes_per_scan, u4bytes_per_scan, ubytes_remain;
-	unsigned char ajremain[4];
+	unsigned char ajremain[4] = {0};
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
