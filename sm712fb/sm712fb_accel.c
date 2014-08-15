@@ -167,8 +167,8 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
 	}
-	if ((rect->dx >= info->var.xres_virtual) ||
-	    (rect->dy >= info->var.yres_virtual)) {
+	if ((image->dx >= info->var.xres_virtual) ||
+	    (image->dy >= info->var.yres_virtual)) {
 		return;
 	}
 	if (unlikely(image->depth != 1)) {
