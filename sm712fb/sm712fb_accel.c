@@ -69,6 +69,14 @@ int sm712fb_wait(struct sm712fb_info *fb)
 	return -EBUSY;
 }
 
+int sm712fb_sync(struct sm712fb_info *fb)
+{
+	if (sm712fb_wait(fb) == 0)
+		return 0;
+	else
+		return 1;
+}
+
 void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 {
 	u32 width = rect->width, height = rect->height;
@@ -97,7 +105,6 @@ void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE |
 	  	    	     (DE_CTRL_COMMAND_SOLIDFILL << DE_CTRL_COMMAND_SHIFT) |
 			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
-	sm712fb_wait(sfb);
 
 	spin_unlock(&sfb->dpr_lock);
 }
@@ -134,7 +141,6 @@ void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE | direction |
 	      		     (DE_CTRL_COMMAND_BITBLT << DE_CTRL_COMMAND_SHIFT) |
 	    		     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
-	sm712fb_wait(sfb);
 
 	spin_unlock(&sfb->dpr_lock);
 }
@@ -207,7 +213,5 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 		}
 		imgidx += src_delta;
 	}
-	sm712fb_wait(sfb);
-
 	spin_unlock(&sfb->dpr_lock);
 }

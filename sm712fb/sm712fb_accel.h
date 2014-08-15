@@ -26,6 +26,7 @@
 
 int sm712fb_init_accel(struct sm712fb_info *fb);
 int sm712fb_wait(struct sm712fb_info *fb);
+int sm712fb_sync(struct sm712fb_info *fb);
 void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect);
 void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area);
 void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image);

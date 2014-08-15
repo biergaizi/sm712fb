@@ -785,6 +785,7 @@ static inline void sm712_init_hw(struct sm712fb_info *sfb)
 		sm712fb_ops.fb_fillrect = sm712fb_fillrect;
 		sm712fb_ops.fb_copyarea = sm712fb_copyarea;
 		sm712fb_ops.fb_imageblit = sm712fb_imageblit;
+		sm712fb_ops.fb_sync = sm712fb_sync;
 		printk("sm712fb: enable 2d acceleration.\n");
 	}
 }
