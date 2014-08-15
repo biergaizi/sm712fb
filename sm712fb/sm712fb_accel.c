@@ -88,6 +88,10 @@ void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
 	}
+	if ((rect->dx >= info->var.xres_virtual) ||
+	    (rect->dy >= info->var.yres_virtual)) {
+		return;
+	}
 
 	if (info->fix.visual == FB_VISUAL_TRUECOLOR ||
 	    info->fix.visual == FB_VISUAL_DIRECTCOLOR) {
@@ -119,6 +123,10 @@ void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	struct sm712fb_info *sfb = info->par;
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
+		return;
+	}
+	if ((sx >= info->var.xres_virtual) ||
+	    (sy >= info->var.yres_virtual)) {
 		return;
 	}
 
@@ -163,6 +171,10 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	unsigned char ajremain[4] = {0};
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
+		return;
+	}
+	if ((rect->dx >= info->var.xres_virtual) ||
+	    (rect->dy >= info->var.yres_virtual)) {
 		return;
 	}
 	if (unlikely(image->depth != 1)) {
