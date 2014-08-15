@@ -48,6 +48,7 @@ struct sm712fb_info {
 	u32 colreg[17];
 
 	bool accel;
+	spinlock_t dpr_lock;  /* locked when drawing engine is working */
 };
 
 /* constants for registers operations */
