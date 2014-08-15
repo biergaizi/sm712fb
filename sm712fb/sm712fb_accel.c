@@ -34,8 +34,6 @@ int sm712fb_init_accel(struct sm712fb_info *fb)
 	unsigned long flags;
 	u8 reg;
 
-	spin_lock_irqsave(&fb->dpr_lock, flags);
-
 	sm712_write_seq(fb, 0x21,
 			sm712_read_seq(fb, 0x21) & 0xf8);
 	reg = sm712_read_seq(fb, 0x15);
@@ -43,7 +41,6 @@ int sm712fb_init_accel(struct sm712fb_info *fb)
 	sm712_write_seq(fb, 0x15, reg);
 
 	if (sm712fb_wait(fb) != 0) {
-		spin_unlock_irqrestore(&fb->dpr_lock, flags);
 		return -1;
 	}
 
@@ -61,7 +58,7 @@ int sm712fb_init_accel(struct sm712fb_info *fb)
 	sm712_write_dpr(fb, DPR_SRC_BASE, 0);
 	sm712_write_dpr(fb, DPR_DST_BASE, 0);
 
-	spin_unlock_irqrestore(&fb->dpr_lock, flags);
+	spin_unlock(&fb->dpr_lock);
 	return 0;
 }
 
@@ -87,8 +84,6 @@ void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 
 	struct sm712fb_info *sfb = info->par;
 
-	unsigned long flags;
-
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
 	}
@@ -105,7 +100,7 @@ void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 		color = rect->color;
 	}
 
-	spin_lock_irqsave(&sfb->dpr_lock, flags);
+	spin_lock(&sfb->dpr_lock);
 
 	sm712_write_dpr(sfb, DPR_FG_COLOR, color);
 	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
@@ -115,7 +110,7 @@ void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
 	sm712fb_wait(sfb);
 
-	spin_unlock_irqrestore(&sfb->dpr_lock, flags);
+	spin_unlock(&sfb->dpr_lock);
 }
 
 void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
@@ -126,8 +121,6 @@ void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	u32 direction;
 
 	struct sm712fb_info *sfb = info->par;
-
-	unsigned long flags;
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
@@ -148,7 +141,7 @@ void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 		direction = 0;
 	}
 
-	spin_lock_irqsave(&sfb->dpr_lock, flags);
+	spin_lock(&sfb->dpr_lock);
 
 	sm712_write_dpr(sfb, DPR_SRC_COORDS, DPR_COORDS(sx, sy));
 	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
@@ -158,7 +151,7 @@ void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	    		     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
 	sm712fb_wait(sfb);
 
-	spin_unlock_irqrestore(&sfb->dpr_lock, flags);
+	spin_unlock(&sfb->dpr_lock);
 }
 
 void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
@@ -177,8 +170,6 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	int i, j;
 	unsigned int ubytes_per_scan, u4bytes_per_scan, ubytes_remain;
 	unsigned char ajremain[4] = {0};
-
-	unsigned long flags;
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
@@ -211,7 +202,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	u4bytes_per_scan = ubytes_per_scan & ~3;
 	ubytes_remain = ubytes_per_scan & 3;
 
-	spin_lock_irqsave(&sfb->dpr_lock, flags);
+	spin_lock(&sfb->dpr_lock);
 
 	sm712_write_dpr(sfb, DPR_SRC_COORDS, 0);
 	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
@@ -237,5 +228,5 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	}
 	sm712fb_wait(sfb);
 
-	spin_unlock_irqrestore(&sfb->dpr_lock, flags);
+	spin_unlock(&sfb->dpr_lock);
 }
