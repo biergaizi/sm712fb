@@ -32,12 +32,20 @@
 int sm712fb_init_accel(struct sm712fb_info *fb)
 {
 	unsigned long flags;
-
-	if (sm712fb_wait(fb) != 0) {
-		return -1;
-	}
+	u8 reg;
 
 	spin_lock_irqsave(&fb->dpr_lock, flags);
+
+	sm712_write_seq(fb, 0x21,
+			sm712_read_seq(fb, 0x21) & 0xf8);
+	reg = sm712_read_seq(fb, 0x15);
+	sm712_write_seq(fb, 0x15, reg | 0x30);
+	sm712_write_seq(fb, 0x15, reg);
+
+	if (sm712fb_wait(fb) != 0) {
+		spin_unlock_irqrestore(&fb->dpr_lock, flags);
+		return -1;
+	}
 
 	sm712_write_dpr(fb, DPR_CROP_TOPLEFT_COORDS, DPR_COORDS(0, 0));
 
