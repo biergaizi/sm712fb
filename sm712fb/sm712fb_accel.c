@@ -65,11 +65,11 @@ int sm712fb_wait(struct sm712fb_info *fb)
 	int i;
 	u32 reg;
 
-	for (i = 0; i < 10000; i++) {
+	for (i = 0; i < 1000000; i++) {
 		reg = sm712_read_seq(fb, 0x16);
 		if ((reg & 0x18) == 0x10)
 			return 0;
-		udelay(1);
+		udelay(10);
 	}
 	return -EBUSY;
 }
@@ -152,14 +152,14 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 
 	struct sm712fb_info *sfb = info->par;
 
-	unsigned int imgidx = 0;
+	u32 imgidx = 0;
 	/* pitch value in bytes of the source framebuffer,
 	 * +ive = top down; -ive = buttom up */
 	int src_delta = image->width >> 3;
 
 	int i, j;
-	unsigned int ubytes_per_scan, u4bytes_per_scan, ubytes_remain;
-	unsigned char ajremain[4] = {0};
+	u32 total_bytes, total_dwords, remain_bytes;
+	u8 remain[4] = {0};
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
@@ -188,9 +188,9 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	 * A: I don't know, don't ask me.
 	 * TODO: We need clear comments here.  */
 
-	ubytes_per_scan = (width + 0 + 7) / 8; /* start_bit = 0 */
-	u4bytes_per_scan = ubytes_per_scan & ~3;
-	ubytes_remain = ubytes_per_scan & 3;
+	total_bytes = (width + 0 + 7) / 8; /* start_bit = 0 */
+	total_dwords = (total_bytes & ~3);
+	remain_bytes = total_bytes & 3;
 
 	sm712_write_dpr(sfb, DPR_SRC_COORDS, 0);
 	sm712_write_dpr(sfb, DPR_DST_COORDS, DPR_COORDS(dx, dy));
@@ -204,13 +204,13 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
 
 	for (i = 0; i < height; i++) {
-		for (j = 0; j < (u4bytes_per_scan / 4); j++) {
-			sm712_write_dataport(sfb, *(unsigned int *) (&image->data[imgidx] + (j * 4)));
+		for (j = 0; j < total_dwords / 4; j++) {
+			sm712_write_dataport(sfb, *(u32 *) (&image->data[imgidx] + j * 4));
 		}
 
-		if (ubytes_remain) {
-			memcpy(ajremain, &image->data[imgidx] + u4bytes_per_scan, ubytes_remain);
-			sm712_write_dataport(sfb, *(unsigned int *) ajremain);
+		if (remain_bytes) {
+			memcpy(remain, &image->data[imgidx] + total_dwords, remain_bytes);
+			sm712_write_dataport(sfb, *(u32 *) remain);
 		}
 		imgidx += src_delta;
 	}
