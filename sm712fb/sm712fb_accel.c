@@ -217,10 +217,8 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 		bg_color = image->bg_color;
 	}
 
-	/* total bytes we need to write
-	 * 0: the start bit in the bytes array of mono data
-	 * 7: what is it? */
-	total_bytes = (width /* + 0 */+ 7) / 8;
+	/* total bytes we need to write */
+	total_bytes = (width + 7) / 8;
 
 	/* split the bytes into dwords and remainder bytes */
 	total_dwords = (total_bytes & ~3) / 4;
