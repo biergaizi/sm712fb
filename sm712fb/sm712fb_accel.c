@@ -189,7 +189,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	struct sm712fb_info *sfb = info->par;
 
 	u32 imgidx = 0;
-	u32 src_delta = image->width >> 3;
+	u32 line = image->width >> 3;
 
 	int i, j;
 	u32 total_bytes, total_dwords, remain_bytes;
@@ -247,7 +247,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 			sm712_write_dataport(sfb, bytes_to_dword(&image->data[imgidx] + (total_dwords * 4),
 						remain_bytes));
 		}
-		imgidx += src_delta;
+		imgidx += line;
 	}
 	sm712_read_dpr(sfb, DPR_DE_CTRL);
 	sm712fb_wait(sfb);
