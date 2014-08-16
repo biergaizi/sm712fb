@@ -153,9 +153,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	struct sm712fb_info *sfb = info->par;
 
 	u32 imgidx = 0;
-	/* pitch value in bytes of the source framebuffer,
-	 * +ive = top down; -ive = buttom up */
-	int src_delta = image->width >> 3;
+	u32 src_delta = image->width >> 3;
 
 	int i, j;
 	u32 total_bytes, total_dwords, remain_bytes;
@@ -189,7 +187,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	 * TODO: We need clear comments here.  */
 
 	total_bytes = (width + 0 + 7) / 8; /* start_bit = 0 */
-	total_dwords = (total_bytes & ~3);
+	total_dwords = (total_bytes & ~3) / 4;
 	remain_bytes = total_bytes & 3;
 
 	sm712_write_dpr(sfb, DPR_SRC_COORDS, 0);
@@ -204,12 +202,12 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
 
 	for (i = 0; i < height; i++) {
-		for (j = 0; j < total_dwords / 4; j++) {
+		for (j = 0; j < total_dwords; j++) {
 			sm712_write_dataport(sfb, *(u32 *) (&image->data[imgidx] + j * 4));
 		}
 
 		if (remain_bytes) {
-			memcpy(remain, &image->data[imgidx] + total_dwords, remain_bytes);
+			memcpy(remain, &image->data[imgidx] + (total_dwords * 4), remain_bytes);
 			sm712_write_dataport(sfb, *(u32 *) remain);
 		}
 		imgidx += src_delta;
