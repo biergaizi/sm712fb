@@ -30,31 +30,31 @@
 #define sm712_readl(base, reg)	readl(base + reg)
 
 
-static inline void sm712_write_crtc(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_crtc(struct sm712fb_info *fb, u8 reg, u8 val)
 {
 	sm712_writeb(fb->mmio, 0x3d4, reg);
 	sm712_writeb(fb->mmio, 0x3d5, val);
 }
 
-static inline unsigned int sm712_read_crtc(struct sm712fb_info *fb, int reg)
+static inline u8 sm712_read_crtc(struct sm712fb_info *fb, u8 reg)
 {
 	sm712_writeb(fb->mmio, 0x3d4, reg);
 	return sm712_readb(fb->mmio, 0x3d5);
 }
 
-static inline void sm712_write_grph(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_grph(struct sm712fb_info *fb, u8 reg, u8 val)
 {
 	sm712_writeb(fb->mmio, 0x3ce, reg);
 	sm712_writeb(fb->mmio, 0x3cf, val);
 }
 
-static inline unsigned int sm712_read_grph(struct sm712fb_info *fb, int reg)
+static inline u8 sm712_read_grph(struct sm712fb_info *fb, u8 reg)
 {
 	sm712_writeb(fb->mmio, 0x3ce, reg);
 	return sm712_readb(fb->mmio, 0x3cf);
 }
 
-static inline void sm712_write_attr(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_attr(struct sm712fb_info *fb, u8 reg, u8 val)
 {
 	sm712_readb(fb->mmio, 0x3da);
 	sm712_writeb(fb->mmio, 0x3c0, reg);
@@ -62,24 +62,29 @@ static inline void sm712_write_attr(struct sm712fb_info *fb, int reg, int val)
 	sm712_writeb(fb->mmio, 0x3c0, val);
 }
 
-static inline void sm712_write_seq(struct sm712fb_info *fb, int reg, int val)
+static inline void sm712_write_seq(struct sm712fb_info *fb, u8 reg, u8 val)
 {
 	sm712_writeb(fb->mmio, 0x3c4, reg);
 	sm712_writeb(fb->mmio, 0x3c5, val);
 }
 
-static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, int reg)
+static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, u8 reg)
 {
 	sm712_writeb(fb->mmio, 0x3c4, reg);
 	return sm712_readb(fb->mmio, 0x3c5);
 }
 
-static inline void sm712_write_dpr(struct sm712fb_info *fb, int reg, long val)
+static inline u32 sm712_read_dpr(struct sm712fb_info *fb, u8 reg)
+{
+	return sm712_readl(fb->dpr, reg);
+}
+
+static inline void sm712_write_dpr(struct sm712fb_info *fb, u8 reg, u32 val)
 {
 	sm712_writel(fb->dpr, reg, val);
 }
 
-static inline void sm712_write_dataport(struct sm712fb_info *fb, long int val)
+static inline void sm712_write_dataport(struct sm712fb_info *fb, u32 val)
 {
 	sm712_writel(fb->dataport, 0, val);
 }
