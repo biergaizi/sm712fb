@@ -182,11 +182,12 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 		bg_color = image->bg_color;
 	}
 
-	/* Q: What does the code below actually do?
-	 * A: I don't know, don't ask me.
-	 * TODO: We need clear comments here.  */
+	/* total bytes we need to write
+	 * 0: the start bit in the bytes array of mono data
+	 * 7: what is it? */
+	total_bytes = (width /* + 0 */+ 7) / 8;
 
-	total_bytes = (width + 0 + 7) / 8; /* start_bit = 0 */
+	/* split the bytes into dwords and remainder bytes */
 	total_dwords = (total_bytes & ~3) / 4;
 	remain_bytes = total_bytes & 3;
 
@@ -202,6 +203,7 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
 
 	for (i = 0; i < height; i++) {
+		/* cast bytes data into dwords and write to the dataport */
 		for (j = 0; j < total_dwords; j++) {
 			sm712_write_dataport(sfb, *(u32 *) (&image->data[imgidx] + j * 4));
 		}
