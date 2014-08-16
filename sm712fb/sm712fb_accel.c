@@ -29,6 +29,39 @@
 #include "sm712fb_drv.h"
 #include "sm712fb_accel.h"
 
+static inline u32 bytes_to_dword(const u8 *bytes, int length)
+{
+	u32 dword = 0;
+
+	switch (length) {
+		case 4:
+#ifdef __BIG_ENDIAN
+			dword += bytes[3];
+#else
+			dword += bytes[3] << 24;
+#endif
+		case 3:
+#ifdef __BIG_ENDIAN
+			dword += bytes[2] << 8;
+#else
+			dword += bytes[2] << 16;
+#endif
+		case 2:
+#ifdef __BIG_ENDIAN
+			dword += bytes[1] << 16;
+#else
+			dword += bytes[1] << 8;
+#endif
+		case 1:
+#ifdef __BIG_ENDIAN
+			dword += bytes[0] << 24;
+#else
+			dword += bytes[0];
+#endif
+	}
+	return dword;
+}
+
 int sm712fb_init_accel(struct sm712fb_info *fb)
 {
 	u8 reg;
@@ -160,7 +193,6 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 
 	int i, j;
 	u32 total_bytes, total_dwords, remain_bytes;
-	u8 remain[4] = {0};
 
 	if (unlikely(info->state != FBINFO_STATE_RUNNING)) {
 		return;
@@ -208,12 +240,12 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	for (i = 0; i < height; i++) {
 		/* cast bytes data into dwords and write to the dataport */
 		for (j = 0; j < total_dwords; j++) {
-			sm712_write_dataport(sfb, *(u32 *) (&image->data[imgidx] + j * 4));
+			sm712_write_dataport(sfb, bytes_to_dword(&image->data[imgidx] + j * 4, 4));
 		}
 
 		if (remain_bytes) {
-			memcpy(remain, &image->data[imgidx] + (total_dwords * 4), remain_bytes);
-			sm712_write_dataport(sfb, *(u32 *) remain);
+			sm712_write_dataport(sfb, bytes_to_dword(&image->data[imgidx] + (total_dwords * 4),
+						remain_bytes));
 		}
 		imgidx += src_delta;
 	}
