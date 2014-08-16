@@ -56,6 +56,7 @@ int sm712fb_init_accel(struct sm712fb_info *fb)
 	sm712_write_dpr(fb, DPR_COLOR_COMPARE, 0);
 	sm712_write_dpr(fb, DPR_SRC_BASE, 0);
 	sm712_write_dpr(fb, DPR_DST_BASE, 0);
+	sm712_read_dpr(fb, DPR_DST_BASE);
 
 	return 0;
 }
@@ -104,6 +105,7 @@ void sm712fb_fillrect(struct fb_info *info, const struct fb_fillrect *rect)
 	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE |
 	  	    	     (DE_CTRL_COMMAND_SOLIDFILL << DE_CTRL_COMMAND_SHIFT) |
 			     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
+	sm712_read_dpr(sfb, DPR_DE_CTRL);
 	sm712fb_wait(sfb);
 }
 
@@ -141,6 +143,7 @@ void sm712fb_copyarea(struct fb_info *info, const struct fb_copyarea *area)
 	sm712_write_dpr(sfb, DPR_DE_CTRL, DE_CTRL_START | DE_CTRL_ROP_ENABLE | direction |
 	      		     (DE_CTRL_COMMAND_BITBLT << DE_CTRL_COMMAND_SHIFT) |
 	    		     (DE_CTRL_ROP_SRC << DE_CTRL_ROP_SHIFT));
+	sm712_read_dpr(sfb, DPR_DE_CTRL);
 	sm712fb_wait(sfb);
 }
 
@@ -214,5 +217,6 @@ void sm712fb_imageblit(struct fb_info *info, const struct fb_image *image)
 		}
 		imgidx += src_delta;
 	}
+	sm712_read_dpr(sfb, DPR_DE_CTRL);
 	sm712fb_wait(sfb);
 }
