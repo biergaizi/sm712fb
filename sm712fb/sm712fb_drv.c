@@ -63,8 +63,8 @@ static struct fb_fix_screeninfo sm712fb_fix = {
 	.line_length = 800 * 3,
 	.accel = FB_ACCEL_SMI_LYNX,
 	.type_aux = 0,
-	.xpanstep = 0,
-	.ypanstep = 0,
+	.xpanstep = 1,
+	.ypanstep = 1,
 	.ywrapstep = 0,
 };
 
