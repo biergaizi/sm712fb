@@ -90,8 +90,8 @@ int sm712fb_wait(struct sm712fb_info *fb)
 	u32 reg;
 
 	for (i = 0; i < 1000000; i++) {
-		reg = sm712_read_seq(fb, 0x16);
-		if ((reg & 0x18) == 0x10)
+		reg = sm712_read_seq(fb, SCR_DE_STATUS);
+		if ((reg & SCR_DE_STATUS_MASK) == SCR_DE_IDLE)
 			return 0;
 		udelay(10);
 	}
