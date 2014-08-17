@@ -63,13 +63,6 @@ static inline u32 bytes_to_dword(const u8 *bytes, int length)
 
 int sm712fb_init_accel(struct sm712fb_info *fb)
 {
-	u8 reg;
-
-	sm712_write_seq(fb, 0x21, sm712_read_seq(fb, 0x21) & 0xf8);
-	reg = sm712_read_seq(fb, 0x15);
-	sm712_write_seq(fb, 0x15, reg | 0x30);
-	sm712_write_seq(fb, 0x15, reg);
-
 	if (sm712fb_wait(fb) != 0)
 		return -1;
 
