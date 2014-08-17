@@ -790,18 +790,18 @@ static inline void sm712_init_hw(struct sm712fb_info *sfb)
 #endif
 
 	if (!sfb->accel) {
-		dev_info(sfb->fb.dev, "2d acceleration was disabled by user.\n");
+		dev_info(&sfb->pdev->dev, "2d acceleration was disabled by user.\n");
 		return;
 	}
 
 	if (sm712fb_init_accel(sfb) < 0) {
-		dev_info(sfb->fb.dev, "failed to enable 2d accleration.\n");
+		dev_info(&sfb->pdev->dev, "failed to enable 2d accleration.\n");
 		return;
 	} else {
 		sm712fb_ops.fb_fillrect = sm712fb_fillrect;
 		sm712fb_ops.fb_copyarea = sm712fb_copyarea;
 		sm712fb_ops.fb_imageblit = sm712fb_imageblit;
-		dev_info(sfb->fb.dev, "sm712fb: enable 2d acceleration.\n");
+		dev_info(&sfb->pdev->dev, "sm712fb: enable 2d acceleration.\n");
 	}
 }
 
