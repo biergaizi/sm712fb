@@ -68,7 +68,7 @@ static inline void sm712_write_seq(struct sm712fb_info *fb, u8 reg, u8 val)
 	sm712_writeb(fb->mmio, 0x3c5, val);
 }
 
-static inline unsigned int sm712_read_seq(struct sm712fb_info *fb, u8 reg)
+static inline u8 sm712_read_seq(struct sm712fb_info *fb, u8 reg)
 {
 	sm712_writeb(fb->mmio, 0x3c4, reg);
 	return sm712_readb(fb->mmio, 0x3c5);
