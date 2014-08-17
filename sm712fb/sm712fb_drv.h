@@ -106,7 +106,7 @@ struct sm712fb_info {
 
 #define SCR_DE_STATUS			0x16
 #define SCR_DE_STATUS_MASK		0x18
-#define SCR_DE_ENGINE_IDLE		0x00
+#define SCR_DE_ENGINE_IDLE		0x10
 
 #define	SM712_VPR_BASE			0x0040c000
 #define SM712_VPR_SIZE                  (0x44 + 1)

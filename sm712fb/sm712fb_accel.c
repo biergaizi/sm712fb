@@ -91,7 +91,7 @@ int sm712fb_wait(struct sm712fb_info *fb)
 
 	for (i = 0; i < 10000; i++) {
 		reg = sm712_read_seq(fb, SCR_DE_STATUS);
-		if ((reg & SCR_DE_STATUS_MASK) == SCR_DE_IDLE)
+		if ((reg & SCR_DE_STATUS_MASK) == SCR_DE_ENGINE_IDLE)
 			return 0;
 		udelay(1);
 	}
