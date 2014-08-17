@@ -89,11 +89,11 @@ int sm712fb_wait(struct sm712fb_info *fb)
 	int i;
 	u8 reg;
 
-	for (i = 0; i < 1000000; i++) {
+	for (i = 0; i < 10000; i++) {
 		reg = sm712_read_seq(fb, SCR_DE_STATUS);
 		if ((reg & SCR_DE_STATUS_MASK) == SCR_DE_IDLE)
 			return 0;
-		udelay(10);
+		udelay(1);
 	}
 	return -EBUSY;
 }
