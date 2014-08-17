@@ -65,6 +65,7 @@ int sm712fb_init_accel(struct sm712fb_info *fb)
 {
 	u8 reg;
 
+	/* reset the 2D engine */
 	sm712_write_seq(fb, 0x21, sm712_read_seq(fb, 0x21) & 0xf8);
 	reg = sm712_read_seq(fb, 0x15);
 	sm712_write_seq(fb, 0x15, reg | 0x30);
