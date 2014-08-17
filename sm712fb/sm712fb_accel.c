@@ -87,7 +87,7 @@ int sm712fb_init_accel(struct sm712fb_info *fb)
 int sm712fb_wait(struct sm712fb_info *fb)
 {
 	int i;
-	u32 reg;
+	u8 reg;
 
 	for (i = 0; i < 1000000; i++) {
 		reg = sm712_read_seq(fb, SCR_DE_STATUS);
