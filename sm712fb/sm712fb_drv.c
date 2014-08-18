@@ -248,8 +248,8 @@ static int sm712_blank(int blank_mode, struct fb_info *info)
 		sm712_write_seq(sfb, 0x01, (sm712_read_seq(sfb, 0x01) | 0x20));
 		sm712_write_seq(sfb, 0x20,
 				(sm712_read_seq(sfb, 0x20) & (~0xB0)));
-		sm712_write_seq(sfb, 0x6a, 0x0c);
-		sm712_write_seq(sfb, 0x6b, 0x02);
+		sm712_write_seq(sfb, 0x6a, 0x5a);
+		sm712_write_seq(sfb, 0x6b, 0x20);
 		sm712_write_seq(sfb, 0x21, (sm712_read_seq(sfb, 0x21) | 0x88));
 		sm712_write_seq(sfb, 0x22,
 				((sm712_read_seq(sfb, 0x22) & (~0x30)) | 0x30));
