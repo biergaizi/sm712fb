@@ -708,10 +708,8 @@ static struct sm712fb_info *sm712_fb_info_new(struct pci_dev *pdev)
 	sfb->pdev = pdev;
 
 	sfb->fb.flags = FBINFO_FLAG_DEFAULT |
-			FBINFO_HWACCEL_COPYAREA |
-			FBINFO_HWACCEL_FILLRECT |
-			FBINFO_HWACCEL_IMAGEBLIT |
-			FBINFO_HWACCEL_XPAN | FBINFO_HWACCEL_YPAN;
+	    FBINFO_HWACCEL_COPYAREA |
+	    FBINFO_HWACCEL_FILLRECT | FBINFO_HWACCEL_IMAGEBLIT;
 	sfb->fb.fbops = &sm712fb_ops;
 	sfb->fb.fix = sm712fb_fix;
 	sfb->fb.var = sm712fb_var;
