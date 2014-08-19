@@ -1,8 +1,6 @@
 TODO:
 - Dual head support
-- use kernel coding style
-- refine the code and remove unused code
-- move it to drivers/video/sm7xxfb.c
+- refine the code, convert more registers magic numbers to macros
 
 Please send any patches to Greg Kroah-Hartman <greg@kroah.com> and
-Teddy Wang <teddy.wang@siliconmotion.com.cn>.
+Tom Li <biergaizi@member.fsf.org>.
